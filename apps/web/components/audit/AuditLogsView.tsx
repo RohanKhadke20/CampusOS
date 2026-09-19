@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
-import { FileText, Shield, Clock, Terminal } from "lucide-react";
+import { Shield, Clock, Terminal } from "lucide-react";
+import { Card, CardHeader, CardTitle, Badge } from "@campusos/ui";
 
 export function AuditLogsView() {
   const { activePersona } = useApp();
@@ -11,16 +12,19 @@ export function AuditLogsView() {
 
   if (activePersona.role !== "ADMIN") {
     return (
-      <div className="p-8 text-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+      <Card
+        variant="default"
+        className="p-8 text-center bg-[var(--status-critical-surface)] border-[var(--status-critical-border)] text-[var(--status-critical)] text-xs"
+      >
         Access Denied. Only the ADMIN persona can inspect immutable security audit trails.
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Security & Mutation Audit Logs
         </h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -28,17 +32,25 @@ export function AuditLogsView() {
         </p>
       </div>
 
-      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between text-xs font-bold text-[var(--foreground)]">
-          <span>Security Ledger</span>
-          <span className="font-mono text-[10px] text-emerald-400">Tamper Evident</span>
-        </div>
+      <Card variant="default">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-[var(--brand-indigo)]" />
+            <CardTitle>Security Ledger</CardTitle>
+          </div>
+          <Badge variant="success" size="sm" withDot>
+            Tamper Evident
+          </Badge>
+        </CardHeader>
 
-        <div className="divide-y divide-[var(--border)]">
+        <div className="divide-y divide-[var(--border-subtle)]">
           {logs.map((log) => (
-            <div key={log.id} className="p-4 space-y-1.5 text-xs">
+            <div
+              key={log.id}
+              className="p-4 space-y-2 text-xs hover:bg-[var(--surface-hover)] transition-colors"
+            >
               <div className="flex items-center justify-between">
-                <span className="font-mono font-bold text-indigo-400 text-xs">
+                <span className="font-mono font-semibold text-[var(--brand-indigo)] text-xs">
                   {log.action}
                 </span>
                 <span className="font-mono text-[10px] text-[var(--text-muted)]">
@@ -46,23 +58,27 @@ export function AuditLogsView() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)]">
-                <span>Actor: <strong className="text-[var(--foreground)]">{log.actorId}</strong></span>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--text-muted)]">
+                <span>
+                  Actor: <strong className="text-[var(--text-primary)]">{log.actorId}</strong>
+                </span>
                 <span>•</span>
-                <span>Target: {log.resourceType} ({log.resourceId})</span>
+                <span>
+                  Target: {log.resourceType} ({log.resourceId})
+                </span>
                 <span>•</span>
                 <span className="font-mono">IP: {log.ipAddress}</span>
               </div>
 
               {log.changes && (
-                <pre className="mt-2 p-2 rounded bg-[var(--background)] border border-[var(--border)] text-[10px] font-mono text-[var(--brand-accent)] overflow-x-auto">
+                <pre className="mt-2 p-2.5 rounded-lg bg-[var(--canvas)] border border-[var(--border-subtle)] text-[11px] font-mono text-[var(--text-secondary)] overflow-x-auto leading-relaxed">
                   {JSON.stringify(log.changes, null, 2)}
                 </pre>
               )}
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

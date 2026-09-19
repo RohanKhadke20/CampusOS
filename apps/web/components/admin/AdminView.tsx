@@ -3,7 +3,14 @@
 import React, { useState } from "react";
 import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
-import { Shield, Users, Building2, UserPlus, CheckCircle2 } from "lucide-react";
+import { Shield, Users, CheckCircle2 } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  Button,
+  Badge,
+} from "@campusos/ui";
 
 export function AdminView() {
   const { activePersona } = useApp();
@@ -15,18 +22,31 @@ export function AdminView() {
     setTimeout(() => setElevatedUser(null), 3000);
   };
 
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case "ADMIN":
+        return "critical";
+      case "ORGANIZER":
+        return "brand";
+      case "FACULTY":
+        return "info";
+      default:
+        return "neutral";
+    }
+  };
+
   if (activePersona.role !== "ADMIN") {
     return (
-      <div className="p-8 text-center rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
-        Access Denied. You must switch to the ADMIN persona from the sidebar to view this console.
-      </div>
+      <Card variant="default" className="p-8 text-center bg-[var(--status-critical-surface)] border-[var(--status-critical-border)] text-[var(--status-critical)] text-xs">
+        Access Denied. You must switch to the ADMIN persona from the top navigation to view this console.
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Campus Administrator Console
         </h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -35,61 +55,57 @@ export function AdminView() {
       </div>
 
       {elevatedUser && (
-        <div className="p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
+        <div className="p-3 rounded-lg bg-[var(--status-success-surface)] border border-[var(--status-success-border)] text-[var(--status-success)] text-xs flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{elevatedUser}</span>
         </div>
       )}
 
-      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)] text-xs font-bold text-[var(--foreground)]">
-          Registered Campus Accounts & Roles
-        </div>
+      <Card variant="default">
+        <CardHeader>
+          <CardTitle>Registered Campus Accounts & Roles</CardTitle>
+        </CardHeader>
 
-        <div className="divide-y divide-[var(--border)]">
+        <div className="divide-y divide-[var(--border-subtle)]">
           {users.map((u) => (
-            <div key={u.id} className="p-4 flex items-center justify-between text-xs">
+            <div
+              key={u.id}
+              className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-[var(--surface-hover)] transition-colors"
+            >
               <div className="flex items-center gap-3">
                 <img
                   src={u.profile?.avatarUrl || ""}
                   alt={u.profile?.fullName || ""}
-                  className="w-9 h-9 rounded-full object-cover"
+                  className="w-9 h-9 rounded-full object-cover border border-[var(--border-subtle)] bg-[var(--surface-raised)]"
                 />
                 <div>
-                  <div className="font-semibold text-[var(--foreground)]">
+                  <div className="font-semibold text-[var(--text-primary)]">
                     {u.profile?.fullName}
                   </div>
                   <div className="text-[11px] text-[var(--text-muted)]">{u.email}</div>
-                  <div className="text-[10px] text-[var(--brand-accent)]">
+                  <div className="text-[10px] text-[var(--brand-indigo)] font-mono">
                     ID: {u.profile?.studentId || "Faculty"} • {u.profile?.department}
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
-                    u.role === "ADMIN"
-                      ? "bg-rose-500/10 text-rose-400"
-                      : u.role === "ORGANIZER"
-                      ? "bg-indigo-500/10 text-indigo-400"
-                      : "bg-cyan-500/10 text-cyan-400"
-                  }`}
-                >
+                <Badge variant={getRoleBadgeVariant(u.role)} size="sm">
                   {u.role}
-                </span>
+                </Badge>
 
-                <button
+                <Button
+                  size="xs"
+                  variant="secondary"
                   onClick={() => handlePromote(u.id)}
-                  className="px-2.5 py-1 rounded bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[11px] text-[var(--foreground)]"
                 >
                   Manage Permissions
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -1,8 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sliders, CheckCircle2, AlertCircle, RefreshCw, Layers, ShieldCheck } from "lucide-react";
+import { Sliders, RefreshCw, Layers } from "lucide-react";
 import { CAMPUSOS_MCP_TOOLS } from "@campusos/mcp-server";
+import {
+  Button,
+  Badge,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@campusos/ui";
 
 export function IntegrationsView() {
   const [healthData, setHealthData] = useState<any>(null);
@@ -27,9 +35,9 @@ export function IntegrationsView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+          <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
             Integrations & MCP Infrastructure
           </h1>
           <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -37,87 +45,87 @@ export function IntegrationsView() {
           </p>
         </div>
 
-        <button
+        <Button
+          size="sm"
+          variant="secondary"
           onClick={fetchHealth}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-xs text-[var(--foreground)]"
+          leftIcon={<RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />}
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Refresh Diagnostics</span>
-        </button>
+          Refresh Diagnostics
+        </Button>
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {healthData?.services &&
           Object.entries(healthData.services).map(([key, svc]: [string, any]) => (
-            <div
-              key={key}
-              className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] space-y-2"
-            >
+            <Card key={key} variant="default" className="p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[var(--foreground)] uppercase">
+                <span className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
                   {svc.name || key}
                 </span>
-                <span
-                  className={`text-[10px] font-mono px-2 py-0.5 rounded font-bold ${
+                <Badge
+                  variant={
                     svc.status === "connected" || svc.status === "active"
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "bg-amber-500/10 text-amber-400"
-                  }`}
+                      ? "success"
+                      : "warning"
+                  }
+                  size="sm"
+                  withDot
                 >
                   {svc.status}
-                </span>
+                </Badge>
               </div>
               <div className="text-[11px] text-[var(--text-muted)]">
                 {svc.message || (svc.isMock ? "Demo Fallback Active" : "Operational")}
               </div>
-            </div>
+            </Card>
           ))}
       </div>
 
       {/* Model Context Protocol (MCP) Tools Registry */}
-      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
+      <Card variant="default">
+        <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold text-[var(--foreground)]">
-              Registered MCP Server Tools
-            </span>
+            <Layers className="w-4 h-4 text-[var(--brand-indigo)]" />
+            <CardTitle>Registered MCP Server Tools</CardTitle>
           </div>
-          <span className="text-[10px] font-mono text-[var(--brand-accent)]">
+          <Badge variant="brand" size="sm">
             @modelcontextprotocol/sdk v1.0
-          </span>
-        </div>
+          </Badge>
+        </CardHeader>
 
-        <div className="divide-y divide-[var(--border)]">
+        <div className="divide-y divide-[var(--border-subtle)]">
           {CAMPUSOS_MCP_TOOLS.map((tool) => (
-            <div key={tool.name} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div
+              key={tool.name}
+              className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[var(--surface-hover)] transition-colors"
+            >
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-indigo-400">
+                  <span className="font-mono text-xs font-semibold text-[var(--brand-indigo)]">
                     {tool.name}
                   </span>
-                  <span
-                    className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-semibold ${
-                      tool.isMutating
-                        ? "bg-amber-500/15 text-amber-300"
-                        : "bg-emerald-500/15 text-emerald-300"
-                    }`}
+                  <Badge
+                    variant={tool.isMutating ? "warning" : "success"}
+                    size="sm"
                   >
-                    {tool.isMutating ? "MUTATING (REQUIRES CONFIRMATION)" : "READ ONLY"}
-                  </span>
+                    {tool.isMutating ? "MUTATING (CONFIRMATION REQUIRED)" : "READ ONLY"}
+                  </Badge>
                 </div>
-                <div className="text-xs text-[var(--text-muted)] mt-1">{tool.description}</div>
+                <div className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                  {tool.description}
+                </div>
               </div>
 
-              <div className="text-[10px] font-mono text-[var(--text-muted)] p-2 rounded bg-[var(--surface-raised)] border border-[var(--border)]">
+              <div className="text-[10px] font-mono text-[var(--text-muted)] p-2 rounded-lg bg-[var(--surface-raised)] border border-[var(--border-subtle)] shrink-0">
                 Props: {Object.keys(tool.inputSchema.properties || {}).join(", ") || "none"}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
-import { Users, CheckCircle2, ShieldCheck, ArrowRight, ExternalLink } from "lucide-react";
+import { Users, CheckCircle2, ShieldCheck, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardFooter, Button, Badge } from "@campusos/ui";
 
 export function ClubsView() {
   const { activePersona } = useApp();
@@ -21,7 +22,7 @@ export function ClubsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Clubs & Student Societies
         </h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -29,58 +30,56 @@ export function ClubsView() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {organizations.map((org) => {
           const isMember = joinedOrgs.includes(org.id);
           return (
-            <div
+            <Card
               key={org.id}
-              className="p-5 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex flex-col justify-between hover:border-indigo-500/40 transition-all"
+              variant="default"
+              className="flex flex-col justify-between hover:border-[var(--border-interactive)] transition-all duration-150"
             >
-              <div>
+              <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-3">
                   <img
                     src={org.logoUrl}
                     alt={org.name}
-                    className="w-12 h-12 rounded-xl object-cover border border-[var(--border)]"
+                    className="w-12 h-12 rounded-xl object-cover border border-[var(--border-subtle)] bg-[var(--surface-raised)]"
                   />
                   {org.isVerified && (
-                    <span className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-medium">
-                      <ShieldCheck className="w-3 h-3" />
+                    <Badge variant="success" size="sm" withDot>
                       Verified
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
                 <div className="mt-4">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-semibold">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--brand-indigo)] font-semibold">
                     {org.category}
                   </span>
-                  <h3 className="text-sm font-bold text-[var(--foreground)] mt-0.5">
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)] mt-1 tracking-tight">
                     {org.name}
                   </h3>
-                  <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-relaxed">
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 leading-relaxed line-clamp-3">
                     {org.description}
                   </p>
                 </div>
-              </div>
+              </CardContent>
 
-              <div className="mt-6 pt-4 border-t border-[var(--border)] flex items-center justify-between">
-                <span className="text-[11px] text-[var(--text-muted)]">
+              <CardFooter className="p-4 bg-[var(--surface-raised)] flex items-center justify-between">
+                <span className="text-[11px] text-[var(--text-muted)] font-medium">
                   {isMember ? "Active Member" : "Open for membership"}
                 </span>
-                <button
+                <Button
+                  size="xs"
+                  variant={isMember ? "success" : "primary"}
                   onClick={() => handleToggleJoin(org.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    isMember
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
-                  }`}
+                  leftIcon={isMember ? <CheckCircle2 className="w-3 h-3" /> : undefined}
                 >
                   {isMember ? "Joined" : "Join Society"}
-                </button>
-              </div>
-            </div>
+                </Button>
+              </CardFooter>
+            </Card>
           );
         })}
       </div>

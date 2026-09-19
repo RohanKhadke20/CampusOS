@@ -19,6 +19,7 @@ import {
   Moon,
   Zap,
 } from "lucide-react";
+import { Badge } from "@campusos/ui";
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -49,39 +50,40 @@ export function Sidebar({}: SidebarProps) {
   }
 
   return (
-    <aside className="w-64 border-r border-[var(--border)] bg-[var(--surface)] flex flex-col justify-between h-screen sticky top-0 select-none">
+    <aside className="w-64 border-r border-[var(--border-subtle)] bg-[var(--surface)] flex flex-col justify-between h-screen sticky top-0 select-none">
       {/* Brand Header */}
       <div>
-        <div className="p-4 flex items-center justify-between border-b border-[var(--border)]">
+        <div className="p-4 flex items-center justify-between border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-indigo-600/30">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--brand-indigo)] flex items-center justify-center text-white font-bold shadow-sm">
+              <Zap className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-tight leading-none text-[var(--foreground)]">
+              <div className="text-sm font-semibold tracking-tight leading-none text-[var(--text-primary)]">
                 CampusOS
               </div>
-              <div className="text-[10px] text-[var(--brand-accent)] font-mono font-medium mt-0.5">
-                v1.0 • Command Center
+              <div className="text-[10px] text-[var(--brand-indigo)] font-mono font-medium mt-0.5">
+                v2.4 • Command Center
               </div>
             </div>
           </div>
           <button
             onClick={toggleTheme}
-            className="p-1.5 rounded-md hover:bg-[var(--surface-hover)] text-[var(--text-muted)] transition-colors"
+            className="p-1.5 rounded-md hover:bg-[var(--surface-hover)] text-[var(--text-muted)] transition-colors focus-ring"
             title="Toggle theme"
+            aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Demo Mode Badge */}
-        <div className="mx-3 mt-3 px-3 py-1.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs flex items-center justify-between">
+        <div className="mx-3 mt-3 px-3 py-1.5 rounded-lg bg-[var(--status-warning-surface)] border border-[var(--status-warning-border)] text-[var(--status-warning)] text-xs flex items-center justify-between">
           <span className="flex items-center gap-1.5 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-warning)] animate-pulse"></span>
             Demo Mode Active
           </span>
-          <span className="text-[10px] opacity-80">Zero Creds</span>
+          <span className="text-[10px] opacity-80 font-mono">Zero Creds</span>
         </div>
 
         {/* Navigation list */}
@@ -93,10 +95,10 @@ export function Sidebar({}: SidebarProps) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 focus-ring ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/20"
-                    : "text-[var(--text-muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]"
+                    ? "bg-[var(--brand-indigo)] text-white shadow-sm"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -104,15 +106,12 @@ export function Sidebar({}: SidebarProps) {
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                      isActive
-                        ? "bg-white/20 text-white"
-                        : "bg-[var(--badge-bg)] text-[var(--badge-text)]"
-                    }`}
+                  <Badge
+                    variant={isActive ? "neutral" : "brand"}
+                    size="sm"
                   >
                     {item.badge}
-                  </span>
+                  </Badge>
                 )}
               </button>
             );
@@ -121,7 +120,7 @@ export function Sidebar({}: SidebarProps) {
       </div>
 
       {/* Role & Persona Switcher */}
-      <div className="p-3 border-t border-[var(--border)] bg-[var(--surface-raised)]/40">
+      <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--surface-raised)]">
         <div className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-muted)] mb-2 px-1">
           Switch Persona
         </div>
@@ -130,10 +129,10 @@ export function Sidebar({}: SidebarProps) {
             <button
               key={p.role}
               onClick={() => setPersona(p.role)}
-              className={`text-[10px] py-1 px-1.5 rounded font-medium transition-colors ${
+              className={`text-[10px] py-1 px-1.5 rounded font-medium transition-colors focus-ring ${
                 activePersona.role === p.role
-                  ? "bg-indigo-600 text-white"
-                  : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--foreground)] border border-[var(--border)]"
+                  ? "bg-[var(--brand-indigo)] text-white"
+                  : "bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]"
               }`}
             >
               {p.role}
@@ -142,14 +141,14 @@ export function Sidebar({}: SidebarProps) {
         </div>
 
         {/* User Card */}
-        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border)]">
+        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-[var(--surface)] border border-[var(--border-subtle)]">
           <img
             src={activePersona.avatarUrl}
             alt={activePersona.name}
-            className="w-8 h-8 rounded-full object-cover ring-1 ring-indigo-500/40"
+            className="w-8 h-8 rounded-full object-cover ring-1 ring-[var(--brand-indigo)]/40"
           />
           <div className="overflow-hidden">
-            <div className="text-xs font-semibold truncate text-[var(--foreground)]">
+            <div className="text-xs font-semibold truncate text-[var(--text-primary)]">
               {activePersona.name}
             </div>
             <div className="text-[10px] text-[var(--text-muted)] truncate">

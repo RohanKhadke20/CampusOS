@@ -3,7 +3,19 @@
 import React, { useState } from "react";
 import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
-import { CreditCard, CheckCircle2, AlertCircle, RefreshCw, FileText } from "lucide-react";
+import { CreditCard, CheckCircle2 } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  Badge,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@campusos/ui";
 
 export function PaymentsView() {
   const { activePersona } = useApp();
@@ -12,7 +24,7 @@ export function PaymentsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Payment Transactions & Receipts
         </h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -21,51 +33,58 @@ export function PaymentsView() {
       </div>
 
       {payments.length === 0 ? (
-        <div className="p-8 text-center rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text-muted)] text-xs">
+        <Card variant="default" className="p-8 text-center text-[var(--text-muted)] text-xs">
           No transactions found for this account. Register for a paid hackathon pass in the Events tab to simulate an order.
-        </div>
+        </Card>
       ) : (
-        <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] overflow-hidden">
-          <div className="p-4 border-b border-[var(--border)] flex items-center justify-between text-xs font-bold text-[var(--foreground)]">
-            <span>Transaction Ledger</span>
-            <span className="font-mono text-[10px] text-emerald-400 font-normal">
+        <Card variant="default">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Transaction Ledger</CardTitle>
+            <Badge variant="success" size="sm" withDot>
               Razorpay Verified
-            </span>
-          </div>
-
-          <div className="divide-y divide-[var(--border)]">
-            {payments.map((p) => (
-              <div key={p.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                <div>
-                  <div className="font-semibold text-[var(--foreground)]">{p.eventTitle}</div>
-                  <div className="text-[11px] text-[var(--text-muted)] mt-0.5">
-                    Tier: {p.ticketTitle} • Order ID: <span className="font-mono">{p.orderId}</span>
-                  </div>
-                  {p.paymentId && (
-                    <div className="text-[10px] font-mono text-[var(--brand-accent)] mt-0.5">
-                      Payment ID: {p.paymentId}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-4 sm:text-right">
-                  <div>
-                    <div className="font-mono font-bold text-sm text-[var(--foreground)]">
-                      ₹{p.amountCents / 100}.00 {p.currency}
-                    </div>
-                    <div className="text-[10px] text-[var(--text-muted)] font-mono">
+            </Badge>
+          </CardHeader>
+          <div className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Event & Ticket Tier</TableHead>
+                  <TableHead>Order & Payment IDs</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead className="text-right">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {payments.map((p) => (
+                  <TableRow key={p.id}>
+                    <TableCell>
+                      <div className="font-semibold text-[var(--text-primary)]">{p.eventTitle}</div>
+                      <div className="text-[11px] text-[var(--text-muted)]">Tier: {p.ticketTitle}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-mono text-[11px] text-[var(--text-secondary)]">{p.orderId}</div>
+                      {p.paymentId && (
+                        <div className="text-[10px] font-mono text-[var(--brand-indigo)]">{p.paymentId}</div>
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-[11px] text-[var(--text-muted)]">
                       {new Date(p.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-
-                  <span className="px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold">
-                    {p.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+                    </TableCell>
+                    <TableCell className="font-mono font-bold text-xs text-[var(--text-primary)]">
+                      ₹{p.amountCents / 100}.00 {p.currency}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant="success" size="sm">
+                        {p.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

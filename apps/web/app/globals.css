@@ -1,49 +1,117 @@
 @import "tailwindcss";
 
 :root {
+  /* Canvas & Base Surfaces */
   --canvas: #090d16;
   --surface: #111827;
   --surface-raised: #1e293b;
   --surface-hover: #283548;
+  --surface-glass: rgba(17, 24, 39, 0.85);
+
+  /* Borders */
   --border-subtle: #1e293b;
   --border-interactive: #334155;
+
+  /* Typography */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
+
+  /* Brand Colors (Indigo) */
   --brand-indigo: #6366f1;
   --brand-indigo-hover: #4f46e5;
+  --brand-indigo-subtle: rgba(99, 102, 241, 0.15);
+
+  /* Status Tokens */
   --status-success: #34d399;
   --status-success-surface: rgba(16, 185, 129, 0.12);
   --status-success-border: rgba(16, 185, 129, 0.25);
+
   --status-warning: #fbbf24;
   --status-warning-surface: rgba(245, 158, 11, 0.12);
   --status-warning-border: rgba(245, 158, 11, 0.25);
+
   --status-critical: #f87171;
   --status-critical-surface: rgba(239, 68, 68, 0.12);
   --status-critical-border: rgba(239, 68, 68, 0.25);
+
+  --status-info: #38bdf8;
+  --status-info-surface: rgba(56, 189, 248, 0.12);
+  --status-info-border: rgba(56, 189, 248, 0.25);
+
+  /* Theme Compatibility Aliases */
+  --background: var(--canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
+  --border: var(--border-subtle);
+  --input: var(--border-interactive);
+  --ring: var(--brand-indigo);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--status-critical);
+  --destructive-foreground: #ffffff;
 }
 
 [data-theme="light"] {
+  /* Canvas & Base Surfaces */
   --canvas: #f8fafc;
   --surface: #ffffff;
   --surface-raised: #f1f5f9;
   --surface-hover: #e2e8f0;
+  --surface-glass: rgba(255, 255, 255, 0.85);
+
+  /* Borders */
   --border-subtle: #e2e8f0;
   --border-interactive: #cbd5e1;
+
+  /* Typography */
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #64748b;
+
+  /* Brand Colors (Indigo) */
   --brand-indigo: #4f46e5;
   --brand-indigo-hover: #4338ca;
+  --brand-indigo-subtle: rgba(79, 70, 229, 0.08);
+
+  /* Status Tokens */
   --status-success: #059669;
   --status-success-surface: #ecfdf5;
   --status-success-border: #a7f3d0;
+
   --status-warning: #d97706;
   --status-warning-surface: #fffbeb;
   --status-warning-border: #fde68a;
+
   --status-critical: #dc2626;
   --status-critical-surface: #fef2f2;
   --status-critical-border: #fecaca;
+
+  --status-info: #0284c7;
+  --status-info-surface: #f0f9ff;
+  --status-info-border: #bae6fd;
+
+  /* Theme Compatibility Aliases */
+  --background: var(--canvas);
+  --foreground: var(--text-primary);
+  --card: var(--surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
+  --border: var(--border-subtle);
+  --input: var(--border-interactive);
+  --ring: var(--brand-indigo);
+  --muted: var(--surface-raised);
+  --muted-foreground: var(--text-muted);
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--status-critical);
+  --destructive-foreground: #ffffff;
 }
 
 body {
@@ -53,6 +121,8 @@ body {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Material symbols glyph standard */
@@ -86,4 +156,23 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--surface-hover);
+}
+
+/* Accessible focus ring utility */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--brand-indigo);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

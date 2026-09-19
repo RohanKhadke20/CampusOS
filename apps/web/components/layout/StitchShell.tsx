@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useApp } from "../AppContext";
+import { Badge, Button } from "@campusos/ui";
 
 interface NavItem {
   id: string;
@@ -67,28 +68,28 @@ export function StitchShell({ children }: StitchShellProps) {
   return (
     <div className="min-h-screen bg-[var(--canvas)] flex flex-col">
       {/* TOP HEADER */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-[var(--surface)]/95 backdrop-blur-md border-b border-[var(--border-subtle)] z-50 flex items-center justify-between px-5 shadow-xs">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-[var(--surface-glass)] backdrop-blur-md border-b border-[var(--border-subtle)] z-50 flex items-center justify-between px-5">
         <div className="flex items-center gap-6">
           {/* Logo & Term Status */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-[var(--brand-indigo)] flex items-center justify-center text-white font-bold shrink-0 shadow-sm">
               <span className="material-symbols-outlined text-lg">school</span>
             </div>
             <span className="text-base font-bold tracking-tight flex items-center text-[var(--text-primary)]">
               Campus<span className="text-[var(--brand-indigo)]">OS</span>
             </span>
-            <span className="bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-[var(--text-secondary)] text-[10px] font-semibold px-1.5 py-0.5 rounded font-mono">
+            <Badge variant="neutral" size="sm">
               v2.4 LTS
-            </span>
+            </Badge>
           </div>
 
           <div className="hidden xl:flex items-center gap-2 bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-2.5 py-1 rounded-md text-[var(--text-secondary)] text-xs">
-            <span className="material-symbols-outlined text-sm text-emerald-500">event_upcoming</span>
+            <span className="material-symbols-outlined text-sm text-[var(--status-success)]">event_upcoming</span>
             <span className="font-medium text-[var(--text-primary)]">Fall 2026</span>
             <span className="text-[var(--border-interactive)]">•</span>
-            <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded text-[11px] font-semibold">
+            <Badge variant="success" size="sm">
               Week 7
-            </span>
+            </Badge>
           </div>
         </div>
 
@@ -96,7 +97,7 @@ export function StitchShell({ children }: StitchShellProps) {
         <div className="flex-1 max-w-xl mx-6 hidden lg:block">
           <button
             onClick={() => setActiveTab("ai")}
-            className="w-full flex items-center justify-between bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-3.5 py-1.5 rounded-lg text-[var(--text-muted)] hover:border-[var(--border-interactive)] hover:bg-[var(--surface)] transition-all shadow-xs group"
+            className="w-full flex items-center justify-between bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-3.5 py-1.5 rounded-lg text-[var(--text-muted)] hover:border-[var(--border-interactive)] hover:bg-[var(--surface)] transition-all duration-150 group focus-ring"
           >
             <div className="flex items-center gap-2.5">
               <span className="material-symbols-outlined text-base text-[var(--text-muted)] group-hover:text-[var(--text-primary)]">
@@ -106,7 +107,7 @@ export function StitchShell({ children }: StitchShellProps) {
                 Search courses, clubs, rooms, or ask Campus AI...
               </span>
             </div>
-            <kbd className="bg-[var(--surface)] border border-[var(--border-subtle)] px-1.5 py-0.5 rounded text-[11px] font-mono text-[var(--text-muted)] shadow-xs">
+            <kbd className="bg-[var(--surface)] border border-[var(--border-subtle)] px-1.5 py-0.5 rounded text-[11px] font-mono text-[var(--text-muted)]">
               ⌘K
             </kbd>
           </button>
@@ -116,7 +117,7 @@ export function StitchShell({ children }: StitchShellProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setActiveTab("ai")}
-            className="hidden sm:flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-[var(--brand-indigo)] px-3 py-1.5 rounded-md transition-all shadow-xs text-xs font-semibold"
+            className="hidden sm:flex items-center gap-1.5 bg-[var(--brand-indigo-subtle)] hover:opacity-90 border border-[var(--brand-indigo-subtle)] text-[var(--brand-indigo)] px-3 py-1.5 rounded-lg transition-all text-xs font-semibold focus-ring"
           >
             <span className="material-symbols-outlined text-base">auto_awesome</span>
             <span>Ask Copilot ✦</span>
@@ -124,10 +125,10 @@ export function StitchShell({ children }: StitchShellProps) {
 
           <button
             onClick={handleSos}
-            className={`hidden md:flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors border ${
+            className={`hidden md:flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all border focus-ring ${
               sosActive
-                ? "bg-red-500 text-white border-red-600 animate-pulse"
-                : "bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+                ? "bg-[var(--status-critical)] text-white border-[var(--status-critical)] shadow-[0_0_24px_0_rgba(239,68,68,0.45)] animate-pulse"
+                : "bg-[var(--status-critical-surface)] border-[var(--status-critical-border)] text-[var(--status-critical)] hover:opacity-90"
             }`}
           >
             <span className="material-symbols-outlined text-sm">emergency</span>
@@ -136,8 +137,9 @@ export function StitchShell({ children }: StitchShellProps) {
 
           <button
             onClick={toggleTheme}
-            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-raised)] rounded-md transition-colors"
+            className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-raised)] rounded-lg transition-colors focus-ring"
             title="Toggle theme"
+            aria-label="Toggle color theme"
           >
             <span className="material-symbols-outlined text-lg">
               {theme === "dark" ? "light_mode" : "dark_mode"}
@@ -145,15 +147,15 @@ export function StitchShell({ children }: StitchShellProps) {
           </button>
 
           {/* Persona Switcher Menu */}
-          <div className="flex items-center gap-1.5 bg-[var(--surface-raised)] border border-[var(--border-subtle)] px-2 py-1 rounded-md text-xs">
-            <span className="text-[11px] text-[var(--text-muted)] mr-1 hidden sm:inline">Role:</span>
+          <div className="flex items-center gap-1 bg-[var(--surface-raised)] border border-[var(--border-subtle)] p-1 rounded-lg text-xs">
+            <span className="text-[11px] text-[var(--text-muted)] px-1.5 hidden sm:inline font-medium">Role:</span>
             {personas.map((p) => (
               <button
                 key={p.role}
                 onClick={() => setPersona(p.role)}
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all focus-ring ${
                   activePersona.role === p.role
-                    ? "bg-indigo-600 text-white shadow-xs"
+                    ? "bg-[var(--brand-indigo)] text-white shadow-xs"
                     : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
               >
@@ -167,9 +169,9 @@ export function StitchShell({ children }: StitchShellProps) {
               <img
                 alt={activePersona.name}
                 src={activePersona.avatarUrl}
-                className="w-8 h-8 rounded-full object-cover border border-[var(--border-subtle)] shadow-xs"
+                className="w-8 h-8 rounded-full object-cover border border-[var(--border-subtle)] bg-[var(--surface-raised)]"
               />
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[var(--surface)]"></span>
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[var(--status-success)] ring-2 ring-[var(--surface)]"></span>
             </div>
             <div className="hidden 2xl:block text-left">
               <div className="text-xs font-semibold text-[var(--text-primary)] leading-tight">
@@ -199,9 +201,9 @@ export function StitchShell({ children }: StitchShellProps) {
                     <button
                       key={item.id}
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 focus-ring ${
                         isActive
-                          ? "bg-indigo-500/10 border border-indigo-500/30 text-[var(--brand-indigo)] font-semibold shadow-xs"
+                          ? "bg-[var(--brand-indigo-subtle)] border border-[var(--brand-indigo-subtle)] text-[var(--brand-indigo)] font-semibold shadow-xs"
                           : "text-[var(--text-secondary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-primary)]"
                       }`}
                     >
@@ -216,9 +218,9 @@ export function StitchShell({ children }: StitchShellProps) {
                         <span>{item.label}</span>
                       </div>
                       {item.badge && (
-                        <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold px-1.5 py-0.5 rounded text-[10px] font-mono">
+                        <Badge variant="success" size="sm">
                           {item.badge}
-                        </span>
+                        </Badge>
                       )}
                     </button>
                   );
@@ -229,24 +231,24 @@ export function StitchShell({ children }: StitchShellProps) {
         </div>
 
         {/* Sidebar Footer */}
-        <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] space-y-1.5">
-          <div className="flex items-center gap-2 px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-md text-emerald-400 text-[11px] font-medium font-mono">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] space-y-2">
+          <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[var(--status-success-surface)] border border-[var(--status-success-border)] rounded-lg text-[var(--status-success)] text-[11px] font-medium font-mono">
+            <span className="w-2 h-2 rounded-full bg-[var(--status-success)] animate-pulse"></span>
             <span>GCal Synced • Live</span>
           </div>
 
           <div className="px-2 text-[10px] text-[var(--text-muted)] flex items-center justify-between">
             <span>Demo Mode Active</span>
-            <span className="text-indigo-400 font-mono">Zero Creds</span>
+            <span className="text-[var(--brand-indigo)] font-mono">Zero Creds</span>
           </div>
         </div>
       </aside>
 
       {/* MAIN CANVAS */}
       <div className="pl-64 pt-16 flex-1 flex flex-col">
-        <div className="w-full min-h-screen p-6 md:p-8 bg-[var(--canvas)]">
+        <main className="w-full min-h-[calc(100vh-4rem)] p-6 md:p-8 bg-[var(--canvas)]">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

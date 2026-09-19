@@ -4,7 +4,14 @@ import React, { useState } from "react";
 import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
 import type { Task } from "@campusos/core";
-import { CheckSquare, Plus, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Plus, Clock, CheckCircle2, CheckSquare } from "lucide-react";
+import {
+  Button,
+  Badge,
+  Card,
+  Input,
+  Select,
+} from "@campusos/ui";
 
 export function TasksView() {
   const { activePersona } = useApp();
@@ -34,10 +41,23 @@ export function TasksView() {
     setTasks(demoDb.getTasks(activePersona.id));
   };
 
+  const getPriorityBadgeVariant = (priority: Task["priority"]) => {
+    switch (priority) {
+      case "URGENT":
+        return "critical";
+      case "HIGH":
+        return "warning";
+      case "MEDIUM":
+        return "brand";
+      default:
+        return "neutral";
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
           Tasks & Project Milestones
         </h1>
         <p className="text-xs text-[var(--text-muted)] mt-1">
@@ -46,36 +66,40 @@ export function TasksView() {
       </div>
 
       {/* Task Creation Form */}
-      <form
-        onSubmit={handleCreateTask}
-        className="flex flex-col sm:flex-row items-center gap-2 p-3 rounded-xl bg-[var(--surface)] border border-[var(--border)]"
-      >
-        <input
-          type="text"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          placeholder="Add a new academic assignment or club task..."
-          className="flex-1 w-full px-3 py-1.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-xs text-[var(--foreground)] focus:outline-none focus:border-indigo-500"
-          required
-        />
-        <select
-          value={newPriority}
-          onChange={(e) => setNewPriority(e.target.value as any)}
-          className="px-3 py-1.5 rounded-lg bg-[var(--background)] border border-[var(--border)] text-xs text-[var(--foreground)] focus:outline-none"
+      <Card variant="default">
+        <form
+          onSubmit={handleCreateTask}
+          className="flex flex-col sm:flex-row items-center gap-3 p-3.5"
         >
-          <option value="LOW">Low Priority</option>
-          <option value="MEDIUM">Medium Priority</option>
-          <option value="HIGH">High Priority</option>
-          <option value="URGENT">Urgent</option>
-        </select>
-        <button
-          type="submit"
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Task</span>
-        </button>
-      </form>
+          <div className="flex-1 w-full">
+            <Input
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Add a new academic assignment or club deliverable..."
+              required
+            />
+          </div>
+          <div className="w-full sm:w-44">
+            <Select
+              value={newPriority}
+              onChange={(e) => setNewPriority(e.target.value as any)}
+            >
+              <option value="LOW">Low Priority</option>
+              <option value="MEDIUM">Medium Priority</option>
+              <option value="HIGH">High Priority</option>
+              <option value="URGENT">Urgent</option>
+            </Select>
+          </div>
+          <Button
+            type="submit"
+            size="md"
+            variant="primary"
+            leftIcon={<Plus className="w-3.5 h-3.5" />}
+          >
+            Add Task
+          </Button>
+        </form>
+      </Card>
 
       {/* Task List */}
       <div className="space-y-2.5">
@@ -85,18 +109,18 @@ export function TasksView() {
             <div
               key={task.id}
               onClick={() => handleToggleStatus(task.id!, task.status)}
-              className={`p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+              className={`p-3.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all duration-150 ${
                 isDone
-                  ? "bg-[var(--surface)]/40 border-[var(--border)]/40 opacity-60"
-                  : "bg-[var(--surface)] border-[var(--border)] hover:border-indigo-500/40"
+                  ? "bg-[var(--surface)]/40 border-[var(--border-subtle)] opacity-60"
+                  : "bg-[var(--surface)] border-[var(--border-subtle)] hover:border-[var(--border-interactive)] hover:bg-[var(--surface-hover)]"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${
+                  className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors ${
                     isDone
-                      ? "bg-emerald-500 border-emerald-500 text-white"
-                      : "border-[var(--border)] bg-[var(--background)]"
+                      ? "bg-[var(--status-success)] border-[var(--status-success)] text-white"
+                      : "border-[var(--border-interactive)] bg-[var(--canvas)]"
                   }`}
                 >
                   {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -104,7 +128,9 @@ export function TasksView() {
                 <div>
                   <div
                     className={`text-xs font-semibold ${
-                      isDone ? "line-through text-[var(--text-muted)]" : "text-[var(--foreground)]"
+                      isDone
+                        ? "line-through text-[var(--text-muted)]"
+                        : "text-[var(--text-primary)]"
                     }`}
                   >
                     {task.title}
@@ -117,16 +143,10 @@ export function TasksView() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-[10px] font-mono font-medium px-2 py-0.5 rounded ${
-                    task.priority === "HIGH" || task.priority === "URGENT"
-                      ? "bg-rose-500/10 text-rose-400"
-                      : "bg-indigo-500/10 text-indigo-400"
-                  }`}
-                >
+              <div className="flex items-center gap-2.5">
+                <Badge variant={getPriorityBadgeVariant(task.priority)} size="sm">
                   {task.priority}
-                </span>
+                </Badge>
                 {task.dueDate && (
                   <span className="text-[10px] font-mono text-[var(--text-muted)] flex items-center gap-1">
                     <Clock className="w-3 h-3" />
