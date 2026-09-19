@@ -46,7 +46,7 @@ export interface CalendarEventInput {
 }
 
 // Derive a 32-byte key for AES-256-GCM encryption
-function getEncryptionKey(): Buffer {
+export function getEncryptionKey(): Buffer {
   const secret =
     process.env.GOOGLE_ENCRYPTION_KEY ||
     process.env.GOOGLE_CLIENT_SECRET ||
@@ -120,7 +120,10 @@ export function getGoogleAuthUrl(state?: string): string {
 /**
  * Exchanges authorization code for access and refresh tokens.
  */
-export async function exchangeCodeForTokens(code: string): Promise<{
+export async function exchangeCodeForTokens(
+  code: string,
+  requestedScopes?: string[]
+): Promise<{
   refreshToken: string;
   accessToken: string;
   expiryDate?: number;
@@ -132,13 +135,19 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   if (code.startsWith("test_code_") || !process.env.GOOGLE_CLIENT_SECRET) {
     const mockGoogleUserId = `google_user_${Date.now()}`;
     const mockEmail = `student.${Date.now().toString().slice(-4)}@campusos.edu`;
+    const finalScope = requestedScopes
+      ? requestedScopes.join(" ")
+      : code.includes("drive")
+      ? "https://www.googleapis.com/auth/drive.file openid email profile"
+      : GOOGLE_CALENDAR_SCOPES.join(" ");
+
     return {
       refreshToken: `mock_rt_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`,
       accessToken: `mock_at_${Date.now()}`,
       expiryDate: Date.now() + 3600 * 1000,
       email: mockEmail,
       googleUserId: mockGoogleUserId,
-      scope: GOOGLE_CALENDAR_SCOPES.join(" "),
+      scope: finalScope,
     };
   }
 

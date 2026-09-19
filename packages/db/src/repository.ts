@@ -61,6 +61,21 @@ export interface GoogleConnectionRecord {
   updatedAt: string;
 }
 
+export interface DriveFileRecord {
+  id: string;
+  userId: string;
+  googleFileId: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes?: number;
+  webViewLink: string;
+  webContentLink?: string;
+  thumbnailLink?: string;
+  entityType?: "EVENT_ATTACHMENT" | "SYLLABUS" | "CLUB_DOC" | "RESOURCE";
+  entityId?: string;
+  createdAt: string;
+}
+
 export interface CalendarEventRecord {
   id: string;
   userId: string;
@@ -104,6 +119,7 @@ class DemoRepository {
   private processedWebhooks: Set<string> = new Set<string>();
   private googleConnections: GoogleConnectionRecord[] = [];
   private calendarEvents: CalendarEventRecord[] = [];
+  private driveFiles: DriveFileRecord[] = [];
 
   // User queries
   getUsers(): CampusUser[] {
@@ -1002,6 +1018,71 @@ class DemoRepository {
     const idx = this.calendarEvents.findIndex((e) => e.id === id);
     if (idx >= 0) {
       this.calendarEvents.splice(idx, 1);
+      return true;
+    }
+    return false;
+  }
+
+  // Drive Files
+  getDriveFiles(userId?: string, entityType?: string, entityId?: string): DriveFileRecord[] {
+    let list = this.driveFiles;
+    if (userId) {
+      list = list.filter((f) => f.userId === userId);
+    }
+    if (entityType) {
+      list = list.filter((f) => f.entityType === entityType);
+    }
+    if (entityId) {
+      list = list.filter((f) => f.entityId === entityId);
+    }
+    return list;
+  }
+
+  getDriveFileById(id: string): DriveFileRecord | undefined {
+    return this.driveFiles.find((f) => f.id === id);
+  }
+
+  getDriveFileByGoogleId(googleFileId: string, userId?: string): DriveFileRecord | undefined {
+    return this.driveFiles.find(
+      (f) => f.googleFileId === googleFileId && (!userId || f.userId === userId)
+    );
+  }
+
+  createDriveFile(file: Omit<DriveFileRecord, "id" | "createdAt">): DriveFileRecord {
+    const newFile: DriveFileRecord = {
+      ...file,
+      id: `drv-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    this.driveFiles.unshift(newFile);
+
+    this.logAudit({
+      actorId: file.userId,
+      action: "DRIVE_FILE_RECORDED",
+      resourceType: "drive_file",
+      resourceId: newFile.id,
+      changes: {
+        googleFileId: file.googleFileId,
+        fileName: file.fileName,
+        entityType: file.entityType,
+      },
+    });
+
+    return newFile;
+  }
+
+  deleteDriveFile(id: string, userId?: string): boolean {
+    const idx = this.driveFiles.findIndex(
+      (f) => f.id === id && (!userId || f.userId === userId)
+    );
+    if (idx >= 0) {
+      const removed = this.driveFiles.splice(idx, 1)[0];
+      this.logAudit({
+        actorId: userId || removed.userId,
+        action: "DRIVE_FILE_DELETED",
+        resourceType: "drive_file",
+        resourceId: removed.id,
+      });
       return true;
     }
     return false;

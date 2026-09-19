@@ -26,10 +26,14 @@ export async function GET(request: NextRequest) {
 
     // Resolve user from session or state
     let userId: string | undefined;
+    let oauthType = "calendar";
     if (stateParam) {
       try {
         const decodedState = JSON.parse(Buffer.from(stateParam, "base64url").toString("utf8"));
         userId = decodedState.userId;
+        if (decodedState.type) {
+          oauthType = decodedState.type;
+        }
       } catch {
         // Fall back to current user
       }
@@ -47,8 +51,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Exchange code for tokens
-    const tokens = await exchangeCodeForTokens(code);
+    // Exchange code for tokens (pass requested scopes depending on oauthType)
+    const requestedScopes =
+      oauthType === "drive"
+        ? ["https://www.googleapis.com/auth/drive.file", "openid", "email", "profile"]
+        : undefined;
+
+    const tokens = await exchangeCodeForTokens(code, requestedScopes);
 
     // SECURE STORAGE: Encrypt refresh token using AES-256-GCM before saving
     // Never expose refresh tokens in plaintext to the browser!
@@ -71,7 +80,7 @@ export async function GET(request: NextRequest) {
       // NEVER include encryptedRefreshToken or refreshToken in client responses!
       return NextResponse.json({
         success: true,
-        message: "Google Calendar successfully connected.",
+        message: oauthType === "drive" ? "Google Drive successfully connected." : "Google Calendar successfully connected.",
         data: {
           connected: true,
           email: connection.email,
@@ -81,7 +90,8 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.redirect(new URL("/events?connected=google", request.url));
+    const redirectPath = oauthType === "drive" ? "/resources?connected=drive" : "/events?connected=google";
+    return NextResponse.redirect(new URL(redirectPath, request.url));
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || "Failed to complete Google OAuth exchange." },

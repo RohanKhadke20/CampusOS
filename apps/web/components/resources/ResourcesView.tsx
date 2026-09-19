@@ -5,6 +5,7 @@ import { useApp } from "../AppContext";
 import { demoDb } from "@campusos/db";
 import { Building2, MapPin, Users, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardFooter, Button, Badge } from "@campusos/ui";
+import { DriveResourcesSection } from "./DriveResourcesSection";
 
 export function ResourcesView() {
   const { activePersona } = useApp();
@@ -91,6 +92,9 @@ export function ResourcesView() {
           </Card>
         ))}
       </div>
+
+      {/* Google Drive / Academic Document Repository */}
+      <DriveResourcesSection />
     </div>
   );
 }
