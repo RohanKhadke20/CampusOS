@@ -11,7 +11,9 @@
     "build": "npm run build --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run migrate --workspace=@campusos/db",
+    "db:seed": "npm run seed --workspace=@campusos/db"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

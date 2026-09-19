@@ -29,6 +29,22 @@ export interface PaymentRecord {
   createdAt: string;
 }
 
+export interface NotificationRecord {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  linkUrl?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface MembershipRecord {
+  organizationId: string;
+  userId: string;
+  role: "MEMBER" | "OFFICER" | "LEAD";
+}
+
 class DemoRepository {
   private users: CampusUser[] = demoData.users as CampusUser[];
   private events: any[] = [...demoData.events];
@@ -36,45 +52,11 @@ class DemoRepository {
   private attendance: any[] = [...demoData.attendance];
   private resources: any[] = [...demoData.resources];
   private organizations: any[] = [...demoData.organizations];
-  private registrations: EventRegistration[] = [];
-  private payments: PaymentRecord[] = [
-    {
-      id: "pay-seed-01",
-      userId: "u-student-01",
-      orderId: "order_mock_98124",
-      paymentId: "pay_mock_34571",
-      amountCents: 49900,
-      currency: "INR",
-      status: "CAPTURED",
-      eventTitle: "CampusHack 2026: AI & Edge Systems",
-      ticketTitle: "Student Developer Pass",
-      createdAt: "2026-09-18T14:30:00Z",
-    },
-  ];
-  private auditLogs: AuditLog[] = [
-    {
-      id: "audit-01",
-      actorId: "u-admin-01",
-      action: "ORGANIZATION_VERIFIED",
-      resourceType: "organization",
-      resourceId: "org-acm-01",
-      ipAddress: "192.168.1.100",
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-      changes: { isVerified: true },
-      createdAt: "2026-09-18T10:00:00Z",
-    },
-    {
-      id: "audit-02",
-      actorId: "u-org-01",
-      action: "EVENT_CREATED",
-      resourceType: "event",
-      resourceId: "ev-hackathon-2026",
-      ipAddress: "192.168.1.102",
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-      changes: { title: "CampusHack 2026" },
-      createdAt: "2026-09-18T11:15:00Z",
-    },
-  ];
+  private memberships: MembershipRecord[] = [...(demoData.memberships as MembershipRecord[])];
+  private registrations: any[] = [...demoData.registrations];
+  private payments: PaymentRecord[] = [...(demoData.payments as PaymentRecord[])];
+  private notifications: NotificationRecord[] = [...(demoData.notifications as NotificationRecord[])];
+  private auditLogs: AuditLog[] = [...(demoData.auditLogs as AuditLog[])];
 
   // User queries
   getUsers(): CampusUser[] {
@@ -83,6 +65,10 @@ class DemoRepository {
 
   getUserById(id: string): CampusUser | undefined {
     return this.users.find((u) => u.id === id);
+  }
+
+  getUserByEmail(email: string): CampusUser | undefined {
+    return this.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
   }
 
   // Events
@@ -94,6 +80,10 @@ class DemoRepository {
     return this.events.find((e) => e.id === id);
   }
 
+  getEventBySlug(slug: string): any | undefined {
+    return this.events.find((e) => e.slug === slug);
+  }
+
   createEvent(event: any): any {
     const newEvent = {
       ...event,
@@ -103,7 +93,7 @@ class DemoRepository {
     this.events.unshift(newEvent);
 
     this.logAudit({
-      actorId: event.createdBy || "u-org-01",
+      actorId: event.createdBy || "b2222222-2222-4222-8222-222222222222",
       action: "EVENT_CREATED",
       resourceType: "event",
       resourceId: newEvent.id,
@@ -124,7 +114,7 @@ class DemoRepository {
   registerForEvent(reg: Omit<EventRegistration, "id" | "registrationNumber">): EventRegistration {
     const newReg: EventRegistration = {
       ...reg,
-      id: `reg-${Date.now()}`,
+      id: `g-${Date.now()}`,
       registrationNumber: `CAMPUS-REG-${Math.floor(100000 + Math.random() * 900000)}`,
     };
     this.registrations.unshift(newReg);
@@ -150,7 +140,7 @@ class DemoRepository {
   recordPayment(payment: Omit<PaymentRecord, "id" | "createdAt">): PaymentRecord {
     const newPayment: PaymentRecord = {
       ...payment,
-      id: `pay-${Date.now()}`,
+      id: `p-${Date.now()}`,
       createdAt: new Date().toISOString(),
     };
     this.payments.unshift(newPayment);
@@ -177,7 +167,7 @@ class DemoRepository {
   createTask(task: any): Task {
     const newTask = {
       ...task,
-      id: task.id || `tsk-${Date.now()}`,
+      id: task.id || `k-${Date.now()}`,
       status: task.status || "TODO",
       priority: task.priority || "MEDIUM",
       createdAt: new Date().toISOString(),
@@ -206,7 +196,7 @@ class DemoRepository {
   recordAttendance(record: Omit<AttendanceRecord, "id">): AttendanceRecord {
     const newRecord: AttendanceRecord = {
       ...record,
-      id: `att-${Date.now()}`,
+      id: `l-${Date.now()}`,
     };
     this.attendance.unshift(newRecord);
     return newRecord;
@@ -233,9 +223,38 @@ class DemoRepository {
     return undefined;
   }
 
-  // Organizations
+  // Organizations & Memberships
   getOrganizations(): any[] {
     return this.organizations;
+  }
+
+  getOrganizationBySlug(slug: string): any | undefined {
+    return this.organizations.find((o) => o.slug === slug);
+  }
+
+  getMemberships(organizationId?: string, userId?: string): MembershipRecord[] {
+    return this.memberships.filter((m) => {
+      if (organizationId && m.organizationId !== organizationId) return false;
+      if (userId && m.userId !== userId) return false;
+      return true;
+    });
+  }
+
+  // Notifications
+  getNotifications(userId?: string): NotificationRecord[] {
+    if (userId) {
+      return this.notifications.filter((n) => n.userId === userId);
+    }
+    return this.notifications;
+  }
+
+  markNotificationRead(notificationId: string): boolean {
+    const notification = this.notifications.find((n) => n.id === notificationId);
+    if (notification) {
+      notification.isRead = true;
+      return true;
+    }
+    return false;
   }
 
   // Audit Logs
