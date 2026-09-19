@@ -1,2 +1,2 @@
-export * from "./schema.js";
-export * from "./rbac.js";
+export * from "./schema";
+export * from "./rbac";

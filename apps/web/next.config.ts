@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: [
+    "@campusos/core",
+    "@campusos/db",
+    "@campusos/integrations",
+    "@campusos/ai",
+    "@campusos/ui",
+    "@campusos/mcp-server",
+  ],
 };
 
 export default nextConfig;

@@ -5,10 +5,13 @@
 .env.test.local
 .env.production.local
 
-# Secrets
+# Secrets & Configs with credentials
 *.pem
 *.key
 *.secret
+mcp_config.json
+*secret*
+*credential*
 
 # IDE
 .vscode/

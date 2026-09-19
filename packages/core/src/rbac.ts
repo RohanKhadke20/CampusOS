@@ -1,4 +1,4 @@
-import { UserRole } from "./schema.js";
+import { UserRole } from "./schema";
 
 export type Permission =
   | "events:read"

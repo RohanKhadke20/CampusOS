@@ -1,4 +1,4 @@
-import { CAMPUSOS_MCP_TOOLS } from "./tools.js";
+import { CAMPUSOS_MCP_TOOLS } from "./tools";
 
 export function initMCPServer() {
   return {
@@ -8,4 +8,4 @@ export function initMCPServer() {
   };
 }
 
-export * from "./tools.js";
+export * from "./tools";
