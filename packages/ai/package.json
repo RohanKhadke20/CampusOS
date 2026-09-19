@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "@campusos/core": "*",
-    "@google/genai": "^2.23.0"
+    "@campusos/db": "*",
+    "@google/genai": "^2.23.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

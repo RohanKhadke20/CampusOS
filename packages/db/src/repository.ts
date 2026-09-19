@@ -111,6 +111,36 @@ export interface GmailMessageRecord {
   metadata?: Record<string, any>;
 }
 
+export interface AiConversationRecord {
+  id: string;
+  userId: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AiMessageRecord {
+  id: string;
+  conversationId: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  toolCalls?: any;
+  toolResults?: any;
+  createdAt: string;
+}
+
+export interface AiActionRecord {
+  id: string;
+  conversationId: string;
+  toolName: string;
+  parameters: Record<string, any>;
+  isMutating: boolean;
+  confirmationStatus: "PENDING" | "APPROVED" | "REJECTED";
+  executedAt?: string;
+  result?: Record<string, any>;
+  createdAt: string;
+}
+
 export interface EnrichedRegistration extends EventRegistration {
   user?: CampusUser;
   ticket?: any;
@@ -135,6 +165,9 @@ class DemoRepository {
   private calendarEvents: CalendarEventRecord[] = [];
   private driveFiles: DriveFileRecord[] = [];
   private gmailMessages: GmailMessageRecord[] = [];
+  private aiConversations: AiConversationRecord[] = [];
+  private aiMessages: AiMessageRecord[] = [];
+  private aiActions: AiActionRecord[] = [];
 
   // User queries
   getUsers(): CampusUser[] {
@@ -1141,6 +1174,105 @@ class DemoRepository {
     });
 
     return newRecord;
+  }
+
+  // AI Conversations
+  createAiConversation(userId: string, title?: string): AiConversationRecord {
+    const record: AiConversationRecord = {
+      id: `conv-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      userId,
+      title: title || "New Conversation",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    this.aiConversations.unshift(record);
+    return record;
+  }
+
+  getAiConversations(userId: string): AiConversationRecord[] {
+    return this.aiConversations.filter((c) => c.userId === userId);
+  }
+
+  getAiConversationById(id: string): AiConversationRecord | undefined {
+    return this.aiConversations.find((c) => c.id === id);
+  }
+
+  updateAiConversation(id: string, updates: Partial<AiConversationRecord>): AiConversationRecord | undefined {
+    const conv = this.aiConversations.find((c) => c.id === id);
+    if (!conv) return undefined;
+    if (updates.title) conv.title = updates.title;
+    conv.updatedAt = new Date().toISOString();
+    return conv;
+  }
+
+  deleteAiConversation(id: string): boolean {
+    const idx = this.aiConversations.findIndex((c) => c.id === id);
+    if (idx >= 0) {
+      this.aiConversations.splice(idx, 1);
+      this.aiMessages = this.aiMessages.filter((m) => m.conversationId !== id);
+      this.aiActions = this.aiActions.filter((a) => a.conversationId !== id);
+      return true;
+    }
+    return false;
+  }
+
+  // AI Messages
+  createAiMessage(msg: Omit<AiMessageRecord, "id" | "createdAt">): AiMessageRecord {
+    const record: AiMessageRecord = {
+      ...msg,
+      id: `aimsg-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    this.aiMessages.push(record);
+    const conv = this.getAiConversationById(msg.conversationId);
+    if (conv) conv.updatedAt = record.createdAt;
+    return record;
+  }
+
+  getAiMessages(conversationId: string): AiMessageRecord[] {
+    return this.aiMessages.filter((m) => m.conversationId === conversationId);
+  }
+
+  // AI Actions
+  createAiAction(action: Omit<AiActionRecord, "id" | "createdAt">): AiActionRecord {
+    const record: AiActionRecord = {
+      ...action,
+      id: `action-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: new Date().toISOString(),
+    };
+    this.aiActions.unshift(record);
+    this.logAudit({
+      actorId: undefined,
+      action: "AI_ACTION_PROPOSED",
+      resourceType: "ai_action",
+      resourceId: record.id,
+      changes: {
+        toolName: record.toolName,
+        isMutating: record.isMutating,
+        confirmationStatus: record.confirmationStatus,
+      },
+    });
+    return record;
+  }
+
+  getAiActions(conversationId?: string, status?: string): AiActionRecord[] {
+    let list = this.aiActions;
+    if (conversationId) list = list.filter((a) => a.conversationId === conversationId);
+    if (status) list = list.filter((a) => a.confirmationStatus === status);
+    return list;
+  }
+
+  getAiActionById(id: string): AiActionRecord | undefined {
+    return this.aiActions.find((a) => a.id === id);
+  }
+
+  updateAiAction(id: string, updates: Partial<AiActionRecord>): AiActionRecord | undefined {
+    const action = this.aiActions.find((a) => a.id === id);
+    if (!action) return undefined;
+    if (updates.confirmationStatus) action.confirmationStatus = updates.confirmationStatus;
+    if (updates.executedAt) action.executedAt = updates.executedAt;
+    if (updates.result) action.result = updates.result;
+    return action;
   }
 
   logAudit(audit: Omit<AuditLog, "id" | "createdAt">): AuditLog {
