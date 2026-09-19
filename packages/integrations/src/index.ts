@@ -49,3 +49,4 @@ export function checkIntegrationsHealth(): Record<string, ServiceHealth> {
 }
 
 export * from "./razorpay";
+export * from "./google-calendar";

@@ -49,6 +49,33 @@ export interface NotificationRecord {
   createdAt: string;
 }
 
+export interface GoogleConnectionRecord {
+  id: string;
+  userId: string;
+  googleUserId: string;
+  email: string;
+  encryptedRefreshToken: string;
+  scope: string;
+  tokenExpiry?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CalendarEventRecord {
+  id: string;
+  userId: string;
+  googleEventId?: string;
+  eventId?: string;
+  title: string;
+  description?: string;
+  location?: string;
+  startTime: string;
+  endTime: string;
+  isSynced: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MembershipRecord {
   organizationId: string;
   userId: string;
@@ -75,6 +102,8 @@ class DemoRepository {
   private notifications: NotificationRecord[] = JSON.parse(JSON.stringify(demoData.notifications));
   private auditLogs: AuditLog[] = JSON.parse(JSON.stringify(demoData.auditLogs));
   private processedWebhooks: Set<string> = new Set<string>();
+  private googleConnections: GoogleConnectionRecord[] = [];
+  private calendarEvents: CalendarEventRecord[] = [];
 
   // User queries
   getUsers(): CampusUser[] {
@@ -865,6 +894,117 @@ class DemoRepository {
   // Audit Logs
   getAuditLogs(): AuditLog[] {
     return this.auditLogs;
+  }
+
+  // Google Connections
+  getGoogleConnection(userId: string): GoogleConnectionRecord | undefined {
+    return this.googleConnections.find((c) => c.userId === userId);
+  }
+
+  upsertGoogleConnection(data: {
+    userId: string;
+    googleUserId: string;
+    email: string;
+    encryptedRefreshToken: string;
+    scope: string;
+    tokenExpiry?: string;
+  }): GoogleConnectionRecord {
+    const existingIndex = this.googleConnections.findIndex((c) => c.userId === data.userId);
+    const now = new Date().toISOString();
+
+    if (existingIndex >= 0) {
+      const updated: GoogleConnectionRecord = {
+        ...this.googleConnections[existingIndex],
+        ...data,
+        updatedAt: now,
+      };
+      this.googleConnections[existingIndex] = updated;
+      this.logAudit({
+        actorId: data.userId,
+        action: "GOOGLE_CALENDAR_RECONNECTED",
+        resourceType: "google_connection",
+        resourceId: updated.id,
+        changes: { email: data.email, scope: data.scope },
+      });
+      return updated;
+    }
+
+    const newConn: GoogleConnectionRecord = {
+      id: `gconn-${Date.now()}`,
+      ...data,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.googleConnections.push(newConn);
+
+    this.logAudit({
+      actorId: data.userId,
+      action: "GOOGLE_CALENDAR_CONNECTED",
+      resourceType: "google_connection",
+      resourceId: newConn.id,
+      changes: { email: data.email, scope: data.scope },
+    });
+
+    return newConn;
+  }
+
+  deleteGoogleConnection(userId: string): boolean {
+    const idx = this.googleConnections.findIndex((c) => c.userId === userId);
+    if (idx >= 0) {
+      const removed = this.googleConnections.splice(idx, 1)[0];
+      this.logAudit({
+        actorId: userId,
+        action: "GOOGLE_CALENDAR_DISCONNECTED",
+        resourceType: "google_connection",
+        resourceId: removed.id,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  // Calendar Events
+  getCalendarEvents(userId: string): CalendarEventRecord[] {
+    return this.calendarEvents.filter((e) => e.userId === userId);
+  }
+
+  getCalendarEventById(id: string): CalendarEventRecord | undefined {
+    return this.calendarEvents.find((e) => e.id === id);
+  }
+
+  getCalendarEventByGoogleId(userId: string, googleEventId: string): CalendarEventRecord | undefined {
+    return this.calendarEvents.find((e) => e.userId === userId && e.googleEventId === googleEventId);
+  }
+
+  createCalendarEvent(event: Omit<CalendarEventRecord, "id" | "createdAt" | "updatedAt">): CalendarEventRecord {
+    const now = new Date().toISOString();
+    const newEvent: CalendarEventRecord = {
+      ...event,
+      id: `cal-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.calendarEvents.push(newEvent);
+    return newEvent;
+  }
+
+  updateCalendarEvent(
+    id: string,
+    updates: Partial<Omit<CalendarEventRecord, "id" | "userId" | "createdAt">>
+  ): CalendarEventRecord | undefined {
+    const ev = this.calendarEvents.find((e) => e.id === id);
+    if (!ev) return undefined;
+    Object.assign(ev, updates, { updatedAt: new Date().toISOString() });
+    return ev;
+  }
+
+  deleteCalendarEvent(id: string): boolean {
+    const idx = this.calendarEvents.findIndex((e) => e.id === id);
+    if (idx >= 0) {
+      this.calendarEvents.splice(idx, 1);
+      return true;
+    }
+    return false;
   }
 
   logAudit(audit: Omit<AuditLog, "id" | "createdAt">): AuditLog {

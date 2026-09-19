@@ -42,6 +42,9 @@ export function EventDetailsClient({ slug }: { slug: string }) {
   const [registrationResult, setRegistrationResult] = useState<any>(null);
   const [checkoutOrder, setCheckoutOrder] = useState<any>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [calendarSyncing, setCalendarSyncing] = useState(false);
+  const [calendarSynced, setCalendarSynced] = useState(false);
+  const [calendarNotice, setCalendarNotice] = useState<string | null>(null);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -228,6 +231,43 @@ export function EventDetailsClient({ slug }: { slug: string }) {
     } catch (err: any) {
       setPaymentError(err.message || "Simulation error");
       setRegistering(false);
+    }
+  };
+
+  const handleAddToCalendar = async () => {
+    if (!event) return;
+    try {
+      setCalendarSyncing(true);
+      setCalendarNotice(null);
+      const res = await fetch("/api/google/calendar/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ campusEventId: event.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCalendarSynced(true);
+      } else if (data.error === "disconnected") {
+        const authUrlRes = await fetch("/api/google/oauth/auth-url");
+        const authData = await authUrlRes.json();
+        if (authData.success && authData.authUrl) {
+          if (
+            confirm(
+              "Google Calendar is not connected yet. Would you like to authorize CampusOS to sync events to your Google Calendar?"
+            )
+          ) {
+            window.location.href = authData.authUrl;
+          }
+        } else {
+          setCalendarNotice("Please connect Google Calendar in settings.");
+        }
+      } else {
+        setCalendarNotice(data.message || "Failed to sync with Google Calendar.");
+      }
+    } catch (err: any) {
+      setCalendarNotice(err.message || "Error syncing with Google Calendar.");
+    } finally {
+      setCalendarSyncing(false);
     }
   };
 
@@ -428,6 +468,27 @@ export function EventDetailsClient({ slug }: { slug: string }) {
               <div className="p-3 rounded-xl bg-white/5 flex items-center justify-center gap-2 text-xs text-emerald-300">
                 <QrCode className="w-5 h-5" />
                 <span className="text-[11px] font-medium">Valid for Admission</span>
+              </div>
+
+              {/* Add CampusOS Event to Google Calendar */}
+              <div className="space-y-1.5 pt-1">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full justify-center text-xs border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10"
+                  onClick={handleAddToCalendar}
+                  disabled={calendarSyncing || calendarSynced}
+                  leftIcon={<Calendar className="w-3.5 h-3.5" />}
+                >
+                  {calendarSynced
+                    ? "Added to Google Calendar ✓"
+                    : calendarSyncing
+                    ? "Syncing to Calendar..."
+                    : "Add to Google Calendar"}
+                </Button>
+                {calendarNotice && (
+                  <p className="text-[10px] text-amber-300 text-center">{calendarNotice}</p>
+                )}
               </div>
             </div>
           ) : (

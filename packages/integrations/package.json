@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@campusos/core": "*",
+    "googleapis": "^181.0.0",
     "razorpay": "^2.9.8"
   },
   "devDependencies": {
