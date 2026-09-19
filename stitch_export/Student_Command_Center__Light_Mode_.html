@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "canvas": "#F8FAFC",
+            "border-subtle": "#E2E8F0",
+            "border-interactive": "#CBD5E1",
+            "text-primary": "#0F172A",
+            "text-secondary": "#475569",
+            "text-muted": "#64748B",
+            "brand-indigo": "#4F46E5",
+            "brand-indigo-hover": "#4338CA",
+            "status-success": "#059669",
+            "status-success-surface": "#ECFDF5",
+            "status-success-border": "#A7F3D0",
+            "status-warning": "#D97706",
+            "status-warning-surface": "#FFFBEB",
+            "status-warning-border": "#FDE68A",
+            "status-critical": "#DC2626",
+            "status-critical-surface": "#FEF2F2",
+            "status-critical-border": "#FECACA"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"]
+          },
+          fontSize: {
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.03em", fontWeight: "600" }],
+            "label-md": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "500" }],
+            "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0em", fontWeight: "400" }],
+            "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0em", fontWeight: "400" }],
+            "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "headline-sm": ["15px", { lineHeight: "22px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["20px", { lineHeight: "26px", letterSpacing: "-0.015em", fontWeight: "600" }],
+            "metric-num": ["24px", { lineHeight: "28px", letterSpacing: "-0.02em", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-canvas font-sans text-body-md text-text-primary antialiased selection:bg-indigo-100 selection:text-indigo-900">
+<!-- TOP HEADER -->
+<header class="fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-border-subtle z-50 flex items-center justify-between px-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+<div class="flex items-center gap-6">
+<!-- Logo & Term Status -->
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-sm border border-slate-200">
+          https://lh3.googleusercontent.com/aida/AEtjO1XCYyNd1XC3y9YuzFveakv2xgCpmaD0MwZdgwwlG-ZbVhZ-5BlHmw0KRx0yPuwR_0IX61oDA36homuRrMVLZjs74yhnNhD23cGRdRE7PeLwkxZR91xDYYr87pUaiCIizaH_ev8Cje2x5Ey2WWQ-WzsedV81pDYUOJiIHL_6ftEm7jrF3SYRjEEVaGy0w3HYeg1xCnYuzBq3i13TZ87wKffFBLa5ioB2ehXFJt_hWzw
+        </div>
+<span class="text-base font-bold text-slate-900 tracking-tight flex items-center">
+          Campus<span class="text-brand-indigo">OS</span>
+</span>
+<span class="bg-slate-100 border border-slate-200 text-slate-600 font-label-sm px-1.5 py-0.5 rounded text-[10px]">v2.4 LTS</span>
+</div>
+<div class="hidden xl:flex items-center gap-2 bg-slate-50 border border-border-subtle px-2.5 py-1 rounded-md text-text-secondary text-body-sm">
+<span class="material-symbols-outlined text-sm text-emerald-600">event_upcoming</span>
+<span class="font-medium text-slate-900">Fall 2025</span>
+<span class="text-slate-300">•</span>
+<span class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-1.5 py-0.5 rounded text-[11px] font-semibold">Week 7</span>
+<span class="material-symbols-outlined text-sm text-slate-400">arrow_drop_down</span>
+</div>
+</div>
+<!-- Global Command Search -->
+<div class="flex-1 max-w-xl mx-6 hidden lg:block">
+<button class="w-full flex items-center justify-between bg-slate-50 border border-border-interactive/80 px-3.5 py-1.5 rounded-lg text-slate-500 hover:border-slate-400 hover:bg-white transition-all shadow-sm group">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-600 text-base">search</span>
+<span class="text-body-sm text-slate-500 font-normal">Search courses, clubs, rooms, or ask Campus AI...</span>
+</div>
+<kbd class="bg-white border border-slate-200 px-1.5 py-0.5 rounded font-label-sm text-[11px] text-slate-500 shadow-xs font-mono">⌘K</kbd>
+</button>
+</div>
+<!-- Header Actions & Profile -->
+<div class="flex items-center gap-3">
+<button class="hidden sm:flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-brand-indigo font-label-md px-3 py-1.5 rounded-md transition-all shadow-xs">
+<span class="material-symbols-outlined text-base text-brand-indigo">auto_awesome</span>
+<span class="font-semibold text-xs tracking-wide">Ask Copilot ✦</span>
+</button>
+<button class="hidden md:flex items-center gap-1 bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 px-2.5 py-1 rounded-md font-label-sm transition-colors">
+<span class="material-symbols-outlined text-sm">emergency</span>
+<span>SOS</span>
+</button>
+<button class="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white"></span>
+</button>
+<div class="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-border-subtle px-2.5 py-1 rounded-md text-slate-800 font-label-md cursor-pointer hover:bg-slate-100 transition-colors">
+<span class="text-xs font-medium">Student View</span>
+<span class="material-symbols-outlined text-sm text-slate-400">arrow_drop_down</span>
+</div>
+<div class="flex items-center gap-2.5 pl-1 border-l border-slate-200">
+<div class="relative">
+<img alt="Elena Rostova Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 shadow-xs" src="https://lh3.googleusercontent.com/aida/AEtjO1VWBCWO3D-ulhCjxVJTWLs3jYOC3OyZgejrTra7jDna8eTRE7nVUbCrzbkLn9mJTmHrz5oZqTcnWn_pAPZQ7wTT-YL-Ua0eIacSzNxuT8NlMHthqrPv9Ywk7jRcih4ImEX1CrD6qwGqYZwFq9r-3525mIIcaCKC_vRFHj62Mz05PZufbTqTaqNKpFEkS-3mLoQ1KM1IaAQKZzoDZTZ0n69xDpFMZWgWsFHhBfAPBwWO"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div class="hidden 2xl:block text-left">
+<div class="font-label-md text-slate-900 leading-tight">Elena Rostova</div>
+<div class="font-label-sm text-slate-500 leading-tight text-[11px]">CS &amp; Cognitive '26</div>
+</div>
+</div>
+</div>
+</header>
+<!-- LEFT SIDEBAR -->
+<aside class="fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-border-subtle z-40 flex flex-col justify-between overflow-y-auto px-3 py-4">
+<div class="space-y-4">
+<!-- Section: Overview -->
+<div class="space-y-1">
+<div class="px-2 font-label-sm uppercase tracking-wider text-slate-400 text-[10px] font-bold">Overview</div>
+<nav class="space-y-0.5">
+<a aria-current="page" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md bg-indigo-50 border border-indigo-100 text-brand-indigo font-semibold text-sm shadow-xs transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-brand-indigo">grid_view</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">psychology</span>
+<span>AI Assistant</span>
+</a>
+</nav>
+</div>
+<!-- Section: Academics -->
+<div class="space-y-1">
+<div class="px-2 font-label-sm uppercase tracking-wider text-slate-400 text-[10px] font-bold">Academics</div>
+<nav class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">calendar_today</span>
+<span>Timetable</span>
+</a>
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[19px] text-slate-400">fact_check</span>
+<span>Attendance</span>
+</div>
+<span class="font-label-sm bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-1.5 py-0.5 rounded text-[10px]">94.2%</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">assignment</span>
+<span>Assignments &amp; Tasks</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">folder_special</span>
+<span>Course Vault</span>
+</a>
+</nav>
+</div>
+<!-- Section: Life & Events -->
+<div class="space-y-1">
+<div class="px-2 font-label-sm uppercase tracking-wider text-slate-400 text-[10px] font-bold">Life &amp; Events</div>
+<nav class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">celebration</span>
+<span>Events Discovery</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">date_range</span>
+<span>My Calendar</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">groups</span>
+<span>Clubs &amp; Orgs</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">map</span>
+<span>Campus Map</span>
+</a>
+</nav>
+</div>
+<!-- Section: Governance -->
+<div class="space-y-1">
+<div class="px-2 font-label-sm uppercase tracking-wider text-slate-400 text-[10px] font-bold">Governance</div>
+<nav class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">hub</span>
+<span>Organizer Hub</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">terminal</span>
+<span>Admin Command</span>
+</a>
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[19px] text-slate-400">shield</span>
+<span>Audit Logs</span>
+</a>
+</nav>
+</div>
+</div>
+<!-- Sidebar Footer Badge & Links -->
+<div class="pt-3 mt-3 border-t border-border-subtle space-y-1.5">
+<div class="flex items-center gap-2 px-2 py-1 bg-emerald-50/70 border border-emerald-200/60 rounded-md font-label-sm text-emerald-800 text-[11px]">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-medium">GCal Synced • Live</span>
+</div>
+<nav class="space-y-0.5">
+<a class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-base text-slate-400">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center justify-between px-2.5 py-1.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium text-sm transition-colors" href="#">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-base text-slate-400">keyboard</span>
+<span>Shortcuts</span>
+</div>
+<kbd class="bg-slate-100 border border-slate-200 px-1 py-0.2 rounded font-label-sm text-[10px] text-slate-500">?</kbd>
+</a>
+</nav>
+</div>
+</aside>
+<!-- MAIN CANVAS -->
+<div class="pl-64">
+<main class="w-full min-h-screen pt-20 px-8 pb-10 bg-canvas">
+<div class="flex flex-col w-full gap-5">
+<!-- TOP CONTEXT BAR & ACADEMIC KPI ROW -->
+<section class="flex flex-col gap-4">
+<!-- Greeting & System State Ribbon -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+<div class="flex items-center gap-3.5">
+<div class="relative flex items-center justify-center w-11 h-11 rounded-lg bg-indigo-50 border border-indigo-100 text-brand-indigo shadow-xs">
+<span class="material-symbols-outlined text-2xl">school</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h1 class="font-headline-md text-slate-900 tracking-tight">Good morning, Elena</h1>
+<span class="bg-slate-100 border border-slate-200 text-slate-600 font-label-sm px-2 py-0.5 rounded text-[11px]">CS &amp; CogSci '26</span>
+</div>
+<p class="font-body-sm text-text-muted mt-0.5">You have 2 lectures, 1 lab milestone, and 1 club seminar scheduled today • Turing Quad sync active</p>
+</div>
+</div>
+<div class="flex items-center gap-2 self-start md:self-center">
+<div class="flex items-center gap-1.5 bg-slate-50 border border-border-subtle px-3 py-1.5 rounded-md text-slate-700 font-label-sm text-xs">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span>Term W7 • Day 44/90</span>
+</div>
+<button class="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-border-interactive text-slate-700 px-3 py-1.5 rounded-md font-label-sm text-xs font-medium transition-colors shadow-xs" id="refreshDataBtn">
+<span class="material-symbols-outlined text-sm text-slate-500">sync</span>
+<span>Sync LMS</span>
+</button>
+</div>
+</div>
+<!-- 4 High-Density Metric KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Attendance KPI -->
+<div class="flex flex-col justify-between bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px]">Overall Attendance</span>
+<div class="w-7 h-7 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-lg">fact_check</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-metric-num text-emerald-700">94.8%</span>
+<span class="font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded text-[11px] font-semibold">+1.2%</span>
+</div>
+<div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between font-body-sm text-slate-500 text-xs">
+<span>Safe margin: <strong class="text-slate-800 font-medium">4 lectures</strong></span>
+<span class="text-slate-400">Min req: 80%</span>
+</div>
+</div>
+<!-- Academic Standing -->
+<div class="flex flex-col justify-between bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px]">Cumulative GPA</span>
+<div class="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center text-brand-indigo">
+<span class="material-symbols-outlined text-lg">military_tech</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-metric-num text-slate-900">3.92</span>
+<span class="font-label-sm text-slate-400 text-xs font-normal">/ 4.00</span>
+</div>
+<div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between font-body-sm text-slate-500 text-xs">
+<span>Rank <strong class="text-slate-800 font-medium">#14</strong> of 420</span>
+<span class="font-label-sm text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.2 rounded font-semibold text-[11px]">Top 3.3%</span>
+</div>
+</div>
+<!-- Pending Deliverables -->
+<div class="flex flex-col justify-between bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px]">Pending Deliverables</span>
+<div class="w-7 h-7 rounded-md bg-amber-50 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined text-lg">pending_actions</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-metric-num text-amber-600">3 Due</span>
+<span class="font-label-sm text-slate-500 text-xs">this week</span>
+</div>
+<div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between font-body-sm text-slate-500 text-xs">
+<span class="truncate">CS 341 Lab 3 in <strong class="text-amber-700 font-medium">14h</strong></span>
+<span class="font-label-sm text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.2 rounded font-semibold text-[11px]">Urgent</span>
+</div>
+</div>
+<!-- Campus Passes -->
+<div class="flex flex-col justify-between bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:border-slate-300 transition-all">
+<div class="flex items-center justify-between">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px]">Campus Passes</span>
+<div class="w-7 h-7 rounded-md bg-blue-50 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-lg">confirmation_number</span>
+</div>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-metric-num text-slate-900">2 Active</span>
+<span class="font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded text-[11px] font-semibold">Confirmed</span>
+</div>
+<div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between font-body-sm text-slate-500 text-xs">
+<span class="truncate">HackCampus '25 &amp; MIT Talk</span>
+<span class="font-label-sm text-slate-500">QR ready</span>
+</div>
+</div>
+</div>
+</section>
+<!-- MAIN DENSE COMMAND GRID (8 cols left / 4 cols right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+<!-- LEFT / CENTER COLUMN (8 COLS) -->
+<div class="lg:col-span-8 flex flex-col gap-5 min-w-0">
+<!-- PROACTIVE CAMPUS AI BRIEFING BANNER -->
+<div class="relative overflow-hidden bg-indigo-50/80 border border-indigo-200/90 p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+<div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-indigo via-indigo-400 to-cyan-500"></div>
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pt-1">
+<div class="flex items-start gap-3.5">
+<div class="w-9 h-9 shrink-0 rounded-lg bg-indigo-100 border border-indigo-200 flex items-center justify-center text-brand-indigo shadow-xs">
+<span class="material-symbols-outlined text-xl">auto_awesome</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-label-sm uppercase tracking-wider text-brand-indigo font-bold text-[11px]">CampusOS Synthetics</span>
+<span class="text-slate-300">•</span>
+<span class="font-label-sm text-slate-500 text-[11px]">Just now</span>
+</div>
+<p class="mt-1 font-body-md text-slate-800 leading-snug">
+<span class="text-brand-indigo font-semibold">AI Observation:</span> Distributed Systems Quiz 3 historically tests <strong>Raft consensus leader election</strong> edge cases. 3 relevant lecture slide decks and 1 paper (Ongaro &amp; Ousterhout '14) are indexed in your Course Vault.
+                    </p>
+<div class="mt-3 flex flex-wrap items-center gap-2">
+<button class="flex items-center gap-1.5 bg-brand-indigo hover:bg-brand-indigo-hover text-white font-medium text-xs px-3 py-1.5 rounded-md transition-all shadow-xs">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span>Review Flash Summary (4m)</span>
+</button>
+<button class="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-medium text-xs px-3 py-1.5 rounded-md transition-all shadow-xs">
+<span class="material-symbols-outlined text-sm text-slate-500">quiz</span>
+<span>Practice 5 Mock Questions</span>
+</button>
+<span class="font-body-sm text-slate-500 text-xs ml-1 font-medium">Predictive confidence: 91%</span>
+</div>
+</div>
+</div>
+<button class="self-start text-slate-400 hover:text-slate-700 p-1 rounded-md hover:bg-indigo-100/60 transition-colors" title="Dismiss suggestion">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+</div>
+<!-- TODAY'S LIVE SCHEDULE TIMELINE -->
+<section class="bg-white border border-border-subtle p-5 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-brand-indigo text-xl">schedule</span>
+<h2 class="font-headline-sm text-slate-900">Today's Academic Timeline</h2>
+</div>
+<span class="font-label-sm bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1 rounded-md text-xs font-medium">Thursday, Oct 23</span>
+</div>
+<div class="space-y-3">
+<!-- Live Item: CS 341 (Starts in 35 mins) -->
+<div class="relative bg-slate-50/70 border border-emerald-200/80 p-4 rounded-lg shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+<div class="flex items-start gap-3.5 pl-1">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-white border border-slate-200 rounded-lg shrink-0 text-center shadow-2xs">
+<span class="font-label-sm text-slate-400 text-[11px]">10:30</span>
+<span class="font-label-md text-slate-900 font-bold leading-none text-sm">AM</span>
+<span class="font-label-sm text-slate-500 text-[10px] mt-0.5">80 min</span>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<span class="font-headline-sm text-slate-900 font-semibold">CS 341: Distributed Systems</span>
+<span class="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-label-sm px-2 py-0.5 rounded text-[11px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-ping"></span>
+                          Starts in 35m
+                        </span>
+<span class="bg-slate-100 border border-slate-200 text-slate-600 font-label-sm px-1.5 py-0.5 rounded text-[10px]">Lecture #14</span>
+</div>
+<div class="mt-1 flex flex-wrap items-center gap-3 font-body-sm text-slate-500 text-xs">
+<span class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-sm text-brand-indigo">pin_drop</span>
+                          Turing Hall 204 (2nd Floor)
+                        </span>
+<span>•</span>
+<span>Prof. David Thorne</span>
+<span>•</span>
+<span class="text-emerald-700 font-medium">Bluetooth Beacon in Range</span>
+</div>
+</div>
+</div>
+<!-- Action cluster -->
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<button class="flex items-center gap-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-medium text-xs px-2.5 py-1.5 rounded-md transition-colors shadow-2xs">
+<span class="material-symbols-outlined text-sm text-slate-500">directions</span>
+<span>Room Map</span>
+</button>
+<button class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs px-3 py-1.5 rounded-md transition-colors shadow-xs" id="btCheckinBtn">
+<span class="material-symbols-outlined text-base">bluetooth</span>
+<span>One-Tap Check-in</span>
+</button>
+</div>
+</div>
+<!-- Upcoming Item: MATH 280 -->
+<div class="bg-white border border-border-subtle hover:border-slate-300 p-4 rounded-lg shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+<div class="flex items-start gap-3.5 pl-1">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 border border-slate-200 rounded-lg shrink-0 text-center">
+<span class="font-label-sm text-slate-400 text-[11px]">02:00</span>
+<span class="font-label-md text-slate-900 font-bold leading-none text-sm">PM</span>
+<span class="font-label-sm text-slate-500 text-[10px] mt-0.5">50 min</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-slate-900 font-semibold">MATH 280: Stochastic Models</span>
+<span class="bg-slate-100 border border-slate-200 text-slate-600 font-label-sm px-1.5 py-0.5 rounded text-[10px]">Problem Session</span>
+</div>
+<div class="mt-1 flex flex-wrap items-center gap-3 font-body-sm text-slate-500 text-xs">
+<span class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-sm text-slate-400">pin_drop</span>
+                          Hilbert Center 118
+                        </span>
+<span>•</span>
+<span>Dr. Aris Vance</span>
+<span>•</span>
+<span>Topic: Markov Chains &amp; Stationary Dist.</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<button class="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1.5 rounded-md font-medium text-xs transition-colors">
+<span class="material-symbols-outlined text-sm text-slate-500">menu_book</span>
+<span>Open Slides</span>
+</button>
+</div>
+</div>
+<!-- Lab Milestone: CS 370 -->
+<div class="bg-white border border-border-subtle hover:border-slate-300 p-4 rounded-lg shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+<div class="flex items-start gap-3.5 pl-1">
+<div class="flex flex-col items-center justify-center w-14 h-14 bg-slate-50 border border-slate-200 rounded-lg shrink-0 text-center">
+<span class="font-label-sm text-slate-400 text-[11px]">04:30</span>
+<span class="font-label-md text-slate-900 font-bold leading-none text-sm">PM</span>
+<span class="font-label-sm text-slate-500 text-[10px] mt-0.5">90 min</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-slate-900 font-semibold">CS 370: Machine Learning Lab</span>
+<span class="bg-amber-50 border border-amber-200 text-amber-800 font-label-sm px-1.5 py-0.5 rounded font-semibold text-[10px]">Checkpoint 2</span>
+</div>
+<div class="mt-1 flex flex-wrap items-center gap-3 font-body-sm text-slate-500 text-xs">
+<span class="flex items-center gap-1 text-slate-700 font-medium">
+<span class="material-symbols-outlined text-sm text-slate-400">pin_drop</span>
+                          Ada Lovelace Computing Wing B-12
+                        </span>
+<span>•</span>
+<span>TA: Marcus Shen</span>
+<span>•</span>
+<span class="text-amber-800 font-medium">Group 4 Repository Synced</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<button class="flex items-center gap-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-2.5 py-1.5 rounded-md font-medium text-xs transition-colors">
+<span class="material-symbols-outlined text-sm text-slate-500">terminal</span>
+<span>GPU Cluster</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- COURSE PERFORMANCE & ATTENDANCE MATRIX -->
+<section class="bg-white border border-border-subtle p-5 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 text-xl">table_chart</span>
+<h2 class="font-headline-sm text-slate-900">Semester Enrolled Courses &amp; Standing</h2>
+</div>
+<span class="font-label-sm text-slate-500 text-xs">Fall 2025 • 16.0 Units</span>
+</div>
+<div class="overflow-x-auto border border-border-subtle rounded-lg">
+<table class="w-full text-left font-body-sm text-xs">
+<thead>
+<tr class="bg-slate-50 border-b border-border-subtle text-slate-500 font-label-sm uppercase tracking-wider text-[11px]">
+<th class="py-2.5 px-4">Code &amp; Title</th>
+<th class="py-2.5 px-4">Faculty</th>
+<th class="py-2.5 px-4">Attendance</th>
+<th class="py-2.5 px-4 text-center">Grade</th>
+<th class="py-2.5 px-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 bg-white">
+<!-- Row 1: CS 341 -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">CS 341</div>
+<div class="text-slate-500 text-xs">Distributed Systems (4.0)</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">Prof. D. Thorne</td>
+<td class="py-3 px-4 min-w-[140px]">
+<div class="flex items-center gap-2">
+<div class="w-20 bg-slate-100 border border-slate-200 h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full" style="width: 96%"></div>
+</div>
+<span class="font-semibold text-emerald-700 text-xs">96.0%</span>
+</div>
+<span class="text-slate-400 text-[11px]">24 / 25 attended</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-2 py-0.5 rounded text-[11px]">A (94.2)</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Open Syllabus &amp; Resources">
+<span class="material-symbols-outlined text-base">folder_open</span>
+</button>
+</td>
+</tr>
+<!-- Row 2: CS 370 -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">CS 370</div>
+<div class="text-slate-500 text-xs">Machine Learning &amp; Neural Nets (4.0)</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">Dr. S. Kazi</td>
+<td class="py-3 px-4 min-w-[140px]">
+<div class="flex items-center gap-2">
+<div class="w-20 bg-slate-100 border border-slate-200 h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full" style="width: 92%"></div>
+</div>
+<span class="font-semibold text-emerald-700 text-xs">92.0%</span>
+</div>
+<span class="text-slate-400 text-[11px]">23 / 25 attended</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-2 py-0.5 rounded text-[11px]">A- (91.8)</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Open Syllabus &amp; Resources">
+<span class="material-symbols-outlined text-base">folder_open</span>
+</button>
+</td>
+</tr>
+<!-- Row 3: MATH 280 -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">MATH 280</div>
+<div class="text-slate-500 text-xs">Stochastic Models &amp; Prob (4.0)</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">Dr. A. Vance</td>
+<td class="py-3 px-4 min-w-[140px]">
+<div class="flex items-center gap-2">
+<div class="w-20 bg-slate-100 border border-slate-200 h-2 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full rounded-full" style="width: 100%"></div>
+</div>
+<span class="font-semibold text-emerald-700 text-xs">100%</span>
+</div>
+<span class="text-slate-400 text-[11px]">18 / 18 attended</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold px-2 py-0.5 rounded text-[11px]">A+ (98.0)</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Open Syllabus &amp; Resources">
+<span class="material-symbols-outlined text-base">folder_open</span>
+</button>
+</td>
+</tr>
+<!-- Row 4: PHIL 110 -->
+<tr class="hover:bg-slate-50/80 transition-colors">
+<td class="py-3 px-4">
+<div class="font-semibold text-slate-900 text-sm">PHIL 110</div>
+<div class="text-slate-500 text-xs">Ethics in Autonomous Agents (4.0)</div>
+</td>
+<td class="py-3 px-4 text-slate-600 font-medium">Prof. L. Moreau</td>
+<td class="py-3 px-4 min-w-[140px]">
+<div class="flex items-center gap-2">
+<div class="w-20 bg-slate-100 border border-slate-200 h-2 rounded-full overflow-hidden">
+<div class="bg-amber-500 h-full rounded-full" style="width: 88%"></div>
+</div>
+<span class="font-semibold text-amber-700 text-xs">88.2%</span>
+</div>
+<span class="text-slate-400 text-[11px]">15 / 17 attended</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="bg-indigo-50 border border-indigo-200 text-brand-indigo font-semibold px-2 py-0.5 rounded text-[11px]">A (93.5)</span>
+</td>
+<td class="py-3 px-4 text-right">
+<button class="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors" title="Open Syllabus &amp; Resources">
+<span class="material-symbols-outlined text-base">folder_open</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- ACTIVE ASSIGNMENT TASKBOARD & DEADLINES -->
+<section class="bg-white border border-border-subtle p-5 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-600 text-xl">assignment_late</span>
+<h2 class="font-headline-sm text-slate-900">Urgent Deliverables &amp; Milestones</h2>
+</div>
+<div class="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+<button class="bg-white text-slate-800 font-medium text-xs px-2.5 py-1 rounded-md shadow-2xs">All (3)</button>
+<button class="text-slate-500 hover:text-slate-800 font-medium text-xs px-2.5 py-1 rounded-md">Labs</button>
+<button class="text-slate-500 hover:text-slate-800 font-medium text-xs px-2.5 py-1 rounded-md">Theories</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Card 1: Critical -->
+<div class="bg-slate-50/70 border border-red-200 p-4 rounded-lg shadow-xs flex flex-col justify-between gap-3">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm bg-red-100/80 border border-red-200 text-red-800 font-semibold px-2 py-0.5 rounded text-[11px]">Due in 14h</span>
+<span class="material-symbols-outlined text-red-600 text-base">priority_high</span>
+</div>
+<h3 class="mt-2.5 font-headline-sm text-slate-900 text-sm font-semibold">Raft Leader Election</h3>
+<p class="font-body-sm text-slate-500 text-xs mt-0.5">CS 341 • Lab Assignment #3</p>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="font-body-sm text-slate-600 text-xs font-medium">Local tests: 18/20 passing</span>
+</div>
+</div>
+<div class="pt-3 border-t border-slate-200/80 flex items-center justify-between">
+<span class="font-label-sm text-slate-500 text-xs">Weight: 8%</span>
+<button class="bg-brand-indigo hover:bg-brand-indigo-hover text-white font-medium text-xs px-2.5 py-1 rounded-md transition-colors shadow-xs">
+                      Submit Git SHA
+                    </button>
+</div>
+</div>
+<!-- Card 2: Group Work -->
+<div class="bg-slate-50/70 border border-border-subtle p-4 rounded-lg shadow-xs flex flex-col justify-between gap-3">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm bg-amber-50 border border-amber-200 text-amber-800 font-semibold px-2 py-0.5 rounded text-[11px]">Due Friday 23:59</span>
+<span class="material-symbols-outlined text-slate-400 text-base">group</span>
+</div>
+<h3 class="mt-2.5 font-headline-sm text-slate-900 text-sm font-semibold">Transformer Fine-tuning</h3>
+<p class="font-body-sm text-slate-500 text-xs mt-0.5">CS 370 • Team Project #2</p>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+<span class="font-body-sm text-slate-600 text-xs font-medium">Drafting Evaluation Report</span>
+</div>
+</div>
+<div class="pt-3 border-t border-slate-200/80 flex items-center justify-between">
+<span class="font-label-sm text-slate-500 text-xs">Group 4 (4/4 ready)</span>
+<button class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-medium text-xs px-2.5 py-1 rounded-md transition-colors shadow-2xs">
+                      Open Overleaf
+                    </button>
+</div>
+</div>
+<!-- Card 3: Upcoming Quiz -->
+<div class="bg-slate-50/70 border border-border-subtle p-4 rounded-lg shadow-xs flex flex-col justify-between gap-3">
+<div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-2 py-0.5 rounded text-[11px]">In 4 Days</span>
+<span class="material-symbols-outlined text-slate-400 text-base">edit_note</span>
+</div>
+<h3 class="mt-2.5 font-headline-sm text-slate-900 text-sm font-semibold">Stochastic Midterm 2</h3>
+<p class="font-body-sm text-slate-500 text-xs mt-0.5">MATH 280 • In-Person Exam</p>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-slate-400"></span>
+<span class="font-body-sm text-slate-600 text-xs font-medium">Formula cheat sheet allowed</span>
+</div>
+</div>
+<div class="pt-3 border-t border-slate-200/80 flex items-center justify-between">
+<span class="font-label-sm text-slate-500 text-xs">Hilbert 118</span>
+<button class="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-medium text-xs px-2.5 py-1 rounded-md transition-colors shadow-2xs">
+                      Past Papers (3)
+                    </button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- RIGHT COLUMN (4 COLS) -->
+<div class="lg:col-span-4 flex flex-col gap-5">
+<!-- FAST QUICK ACTIONS WIDGET -->
+<section class="bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-2.5">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px] font-bold">Fast Student Actions</span>
+<div class="grid grid-cols-1 gap-2">
+<!-- Action 1: QR -->
+<button class="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 p-2.5 rounded-lg text-left transition-all group" id="showQrBtn">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-lg">qr_code_scanner</span>
+</div>
+<div>
+<div class="font-label-md text-slate-900 font-semibold group-hover:text-brand-indigo transition-colors text-xs">Instant Attendance QR</div>
+<div class="font-body-sm text-slate-500 text-[11px]">Rotates every 15s • Anti-spoof</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-700 text-base">chevron_right</span>
+</button>
+<!-- Action 2: Book Room -->
+<button class="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 p-2.5 rounded-lg text-left transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-indigo-50 border border-indigo-200 flex items-center justify-center text-brand-indigo">
+<span class="material-symbols-outlined text-lg">meeting_room</span>
+</div>
+<div>
+<div class="font-label-md text-slate-900 font-semibold group-hover:text-brand-indigo transition-colors text-xs">Library Pod 4B Booking</div>
+<div class="font-body-sm text-slate-500 text-[11px]">Free from 12:00 PM • Soundproof</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-700 text-base">chevron_right</span>
+</button>
+<!-- Action 3: Canteen Order -->
+<button class="w-full flex items-center justify-between bg-slate-50 hover:bg-slate-100/90 border border-slate-200/80 p-2.5 rounded-lg text-left transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-md bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined text-lg">local_cafe</span>
+</div>
+<div>
+<div class="font-label-md text-slate-900 font-semibold group-hover:text-brand-indigo transition-colors text-xs">Canteen Express Pre-order</div>
+<div class="font-body-sm text-slate-500 text-[11px]">Oat Cortado &amp; Brioche ready in 8m</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 group-hover:text-slate-700 text-base">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- CAMPUS PULSE & EVENT RADAR -->
+<section class="bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-3.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-emerald-600 text-xl">radar</span>
+<h2 class="font-headline-sm text-slate-900">Campus Event Radar</h2>
+</div>
+<span class="font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-semibold">2 Confirmed</span>
+</div>
+<!-- Featured HackCampus Event -->
+<div class="relative rounded-lg overflow-hidden bg-slate-50 border border-border-subtle shadow-xs flex flex-col">
+<div class="relative h-28 w-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Cyberpunk modern university hackathon auditorium with students working on illuminated laptop screens under ambient lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiVqgk1rBxwt_R-jfQrllGP8T-FnVdjyCVruWjAlmYusBp8WNUKCWnZ2w0WLJ6VuOpz4WrFWAIam5xp9HydJftTbaZ1AFn8Ic_nw3TgRQ-bRxmiFFEoZMkilLhC8m4IFetvzkG1l2Hf8EB1aL0grSz0Zo8Hrjw-bU92qVpoF288S1yocI7PoQcApp1sXrvfHRhB4xfltiObZwnRfhbn8QQMR9LCPhveRrl4eG7jTI"/>
+<div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent"></div>
+<span class="absolute top-2 right-2 bg-white/90 backdrop-blur-md text-emerald-800 border border-emerald-200 font-label-sm px-2 py-0.5 rounded text-[11px] font-semibold shadow-xs">In 3 Days</span>
+</div>
+<div class="p-3.5 flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<span class="bg-indigo-50 border border-indigo-200 text-brand-indigo font-label-sm px-2 py-0.5 rounded font-semibold text-[10px]">Flagship Event</span>
+<span class="text-slate-400 text-[11px]">• 48 Hours</span>
+</div>
+<h3 class="font-headline-sm text-slate-900 text-sm font-semibold">HackCampus 2025: Autonomous Systems</h3>
+<p class="font-body-sm text-slate-500 text-xs line-clamp-2">Student Center Grand Atrium. Your team 'TensorForge' is checked in. Mentors from DeepMind &amp; Stripe confirmed.</p>
+<div class="mt-1 flex items-center justify-between pt-1 border-t border-slate-200/60">
+<div class="flex -space-x-1.5 overflow-hidden">
+<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-200 text-center font-label-sm leading-6 text-slate-700 text-[10px] font-bold">ER</div>
+<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-indigo-100 text-center font-label-sm leading-6 text-brand-indigo text-[10px] font-bold">LK</div>
+<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-slate-300 text-center font-label-sm leading-6 text-slate-800 text-[10px] font-bold">JS</div>
+<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white bg-emerald-100 text-center font-label-sm leading-6 text-emerald-800 text-[10px] font-bold">+1</div>
+</div>
+<button class="bg-brand-indigo hover:bg-brand-indigo-hover text-white font-medium text-xs px-2.5 py-1 rounded-md transition-colors shadow-xs">
+                      View NFC Pass
+                    </button>
+</div>
+</div>
+</div>
+<!-- Secondary Guest Lecture Item -->
+<div class="bg-slate-50 border border-border-subtle p-3 rounded-lg shadow-xs flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex flex-col items-center justify-center shrink-0 text-center shadow-2xs">
+<span class="font-label-sm text-slate-400 text-[10px] leading-none">NOV</span>
+<span class="font-headline-sm text-slate-900 font-bold leading-none mt-0.5 text-sm">02</span>
+</div>
+<div class="min-w-0 flex-1">
+<h4 class="font-label-md text-slate-900 font-semibold truncate text-xs">MIT Media Lab: Neuro-Symbolic AI Talk</h4>
+<p class="font-body-sm text-slate-500 text-[11px] truncate">Guest Speaker Dr. Rebecca Thorne • Kresge Hall</p>
+<span class="inline-block mt-1 font-label-sm text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded text-[10px] font-medium">Pass #409 Confirmed</span>
+</div>
+</div>
+</section>
+<!-- CLUB ANNOUNCEMENT FEED -->
+<section class="bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-brand-indigo text-xl">campaign</span>
+<h2 class="font-headline-sm text-slate-900">Clubs &amp; Orgs Dispatch</h2>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-base cursor-pointer">more_horiz</span>
+</div>
+<div class="space-y-2.5">
+<!-- Announcement 1 -->
+<div class="bg-slate-50 border border-border-subtle p-3 rounded-lg shadow-xs flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-brand-indigo font-semibold text-xs">ACM Student Chapter</span>
+<span class="font-body-sm text-slate-400 text-[11px]">Today 6:30 PM</span>
+</div>
+<p class="font-body-sm text-slate-700 text-xs">Hands-on Vector Databases Workshop: Building semantic cache systems with HNSW indexing. Free pizza at CS Atrium.</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-label-sm text-emerald-700 text-[11px] font-medium">38 attending</span>
+<span class="text-slate-300">•</span>
+<button class="font-label-sm text-brand-indigo hover:underline text-[11px] font-medium">RSVP Quick</button>
+</div>
+</div>
+<!-- Announcement 2 -->
+<div class="bg-slate-50 border border-border-subtle p-3 rounded-lg shadow-xs flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-amber-700 font-semibold text-xs">Robotics &amp; Mechatronics</span>
+<span class="font-body-sm text-slate-400 text-[11px]">Tomorrow</span>
+</div>
+<p class="font-body-sm text-slate-700 text-xs">Lab slot allocation for RoboSub 2026 telemetry testing finalized. Check shared Notion directory.</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-label-sm text-slate-500 text-[11px]">Room: Mechatronics B-04</span>
+</div>
+</div>
+</div>
+</section>
+<!-- CAMPUS HEALTH / FACILITY STATUS MINI-TELEMETRY -->
+<div class="bg-white border border-border-subtle p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col gap-2">
+<span class="font-label-sm uppercase tracking-wider text-slate-500 text-[10px] font-bold">Campus Node Telemetry</span>
+<div class="mt-1 space-y-2 font-body-sm text-xs">
+<div class="flex items-center justify-between">
+<span class="text-slate-600 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    Central Library Quiet Level 3
+                  </span>
+<span class="font-label-sm text-emerald-700 font-medium">Low Density (24%)</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-slate-600 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    Main Dining Hall
+                  </span>
+<span class="font-label-sm text-amber-700 font-medium">Busiest peak (88%)</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-slate-600 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    CS Server Cluster (Slurm)
+                  </span>
+<span class="font-label-sm text-emerald-700 font-medium">Queue &lt; 2 mins</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- QR DIALOG MODAL (INTERACTIVE INLINE TOGGLE) -->
+<div class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4" id="qrModal">
+<div class="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full flex flex-col items-center gap-4 text-center border border-border-subtle">
+<div class="flex items-center justify-between w-full">
+<span class="font-label-sm uppercase tracking-wider text-emerald-700 font-bold text-xs">Dynamic Student ID</span>
+<button class="text-slate-400 hover:text-slate-700 p-1 rounded-md hover:bg-slate-100" id="closeQrBtn">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<!-- Crisp QR Code frame -->
+<div class="p-4 bg-slate-50 border border-border-subtle rounded-xl shadow-inner flex flex-col items-center">
+<svg class="w-44 h-44 text-slate-900" fill="currentColor" viewbox="0 0 100 100">
+<rect fill="currentColor" height="25" width="25" x="5" y="5"></rect>
+<rect fill="#F8FAFC" height="15" width="15" x="10" y="10"></rect>
+<rect fill="currentColor" height="9" width="9" x="13" y="13"></rect>
+<rect fill="currentColor" height="25" width="25" x="70" y="5"></rect>
+<rect fill="#F8FAFC" height="15" width="15" x="75" y="10"></rect>
+<rect fill="currentColor" height="9" width="9" x="78" y="13"></rect>
+<rect fill="currentColor" height="25" width="25" x="5" y="70"></rect>
+<rect fill="#F8FAFC" height="15" width="15" x="10" y="75"></rect>
+<rect fill="currentColor" height="9" width="9" x="13" y="78"></rect>
+<rect height="6" width="6" x="35" y="8"></rect>
+<rect height="6" width="6" x="45" y="8"></rect>
+<rect height="6" width="6" x="55" y="8"></rect>
+<rect height="6" width="8" x="35" y="20"></rect>
+<rect height="6" width="12" x="48" y="22"></rect>
+<rect height="6" width="8" x="8" y="35"></rect>
+<rect height="6" width="8" x="22" y="38"></rect>
+<rect height="18" width="18" x="36" y="35"></rect>
+<rect height="8" width="8" x="60" y="38"></rect>
+<rect height="6" width="14" x="75" y="35"></rect>
+<rect height="8" width="18" x="75" y="48"></rect>
+<rect height="6" width="12" x="35" y="60"></rect>
+<rect height="14" width="8" x="52" y="65"></rect>
+<rect height="6" width="10" x="65" y="62"></rect>
+<rect height="14" width="8" x="35" y="75"></rect>
+<rect height="16" width="16" x="75" y="75"></rect>
+</svg>
+</div>
+<div class="space-y-1">
+<div class="font-headline-sm text-slate-900 font-semibold">Elena Rostova</div>
+<div class="font-label-sm text-slate-500">ID #904-819-204 • CS &amp; CogSci</div>
+<div class="flex items-center justify-center gap-1.5 mt-2 text-emerald-700 font-label-sm bg-emerald-50 border border-emerald-200 py-1 px-2.5 rounded-full">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+<span>Valid for CS 341 Check-in (12s)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- CLIENT SCRIPTS -->
+<script>
+          // QR Code Modal Trigger
+          const showQrBtn = document.getElementById('showQrBtn');
+          const qrModal = document.getElementById('qrModal');
+          const closeQrBtn = document.getElementById('closeQrBtn');
+
+          if (showQrBtn && qrModal && closeQrBtn) {
+            showQrBtn.addEventListener('click', () => {
+              qrModal.classList.remove('hidden');
+              qrModal.classList.add('flex');
+            });
+            closeQrBtn.addEventListener('click', () => {
+              qrModal.classList.add('hidden');
+              qrModal.classList.remove('flex');
+            });
+            qrModal.addEventListener('click', (e) => {
+              if (e.target === qrModal) {
+                qrModal.classList.add('hidden');
+                qrModal.classList.remove('flex');
+              }
+            });
+          }
+
+          // Bluetooth one-tap check-in simulation
+          const btCheckinBtn = document.getElementById('btCheckinBtn');
+          if (btCheckinBtn) {
+            btCheckinBtn.addEventListener('click', function() {
+              this.disabled = true;
+              this.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">sync</span><span>Verifying BLE...</span>';
+              setTimeout(() => {
+                this.innerHTML = '<span class="material-symbols-outlined text-base text-emerald-700">check_circle</span><span class="text-slate-800">Checked In!</span>';
+                this.classList.remove('bg-emerald-600', 'hover:bg-emerald-700', 'text-white');
+                this.classList.add('bg-emerald-50', 'border', 'border-emerald-300', 'text-slate-800');
+              }, 1200);
+            });
+          }
+
+          // Sync button feedback
+          const refreshDataBtn = document.getElementById('refreshDataBtn');
+          if (refreshDataBtn) {
+            refreshDataBtn.addEventListener('click', function() {
+              const icon = this.querySelector('.material-symbols-outlined');
+              if (icon) icon.classList.add('animate-spin');
+              setTimeout(() => {
+                if (icon) icon.classList.remove('animate-spin');
+              }, 1000);
+            });
+          }
+        </script>
+</div>
+</main>
+</div>
+</body></html>

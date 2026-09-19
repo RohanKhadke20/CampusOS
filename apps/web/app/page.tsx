@@ -2,8 +2,8 @@
 
 import React from "react";
 import { AppProvider, useApp } from "../components/AppContext";
-import { Sidebar } from "../components/layout/Sidebar";
-import { DashboardView } from "../components/dashboard/DashboardView";
+import { StitchShell } from "../components/layout/StitchShell";
+import { StitchStudentDashboard } from "../components/dashboard/StitchStudentDashboard";
 import { EventsView } from "../components/events/EventsView";
 import { ClubsView } from "../components/clubs/ClubsView";
 import { TasksView } from "../components/tasks/TasksView";
@@ -20,8 +20,8 @@ function MainContent() {
   const { activeTab } = useApp();
 
   return (
-    <main className="flex-1 p-6 md:p-8 max-w-7xl mx-auto w-full overflow-y-auto">
-      {activeTab === "dashboard" && <DashboardView />}
+    <div className="w-full">
+      {activeTab === "dashboard" && <StitchStudentDashboard />}
       {activeTab === "events" && <EventsView />}
       {activeTab === "clubs" && <ClubsView />}
       {activeTab === "tasks" && <TasksView />}
@@ -33,17 +33,16 @@ function MainContent() {
       {activeTab === "integrations" && <IntegrationsView />}
       {activeTab === "admin" && <AdminView />}
       {activeTab === "audit" && <AuditLogsView />}
-    </main>
+    </div>
   );
 }
 
 export default function Home() {
   return (
     <AppProvider>
-      <div className="flex min-h-screen bg-[var(--background)]">
-        <Sidebar />
+      <StitchShell>
         <MainContent />
-      </div>
+      </StitchShell>
     </AppProvider>
   );
 }
