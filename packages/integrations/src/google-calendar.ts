@@ -139,6 +139,8 @@ export async function exchangeCodeForTokens(
       ? requestedScopes.join(" ")
       : code.includes("drive")
       ? "https://www.googleapis.com/auth/drive.file openid email profile"
+      : code.includes("gmail")
+      ? "https://www.googleapis.com/auth/gmail.send openid email profile"
       : GOOGLE_CALENDAR_SCOPES.join(" ");
 
     return {

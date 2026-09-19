@@ -55,6 +55,8 @@ export async function GET(request: NextRequest) {
     const requestedScopes =
       oauthType === "drive"
         ? ["https://www.googleapis.com/auth/drive.file", "openid", "email", "profile"]
+        : oauthType === "gmail"
+        ? ["https://www.googleapis.com/auth/gmail.send", "openid", "email", "profile"]
         : undefined;
 
     const tokens = await exchangeCodeForTokens(code, requestedScopes);
@@ -78,9 +80,14 @@ export async function GET(request: NextRequest) {
 
     if (wantsJson) {
       // NEVER include encryptedRefreshToken or refreshToken in client responses!
+      const successMessages: Record<string, string> = {
+        drive: "Google Drive successfully connected.",
+        gmail: "Gmail successfully connected.",
+        calendar: "Google Calendar successfully connected.",
+      };
       return NextResponse.json({
         success: true,
-        message: oauthType === "drive" ? "Google Drive successfully connected." : "Google Calendar successfully connected.",
+        message: successMessages[oauthType] || successMessages.calendar,
         data: {
           connected: true,
           email: connection.email,
@@ -90,7 +97,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const redirectPath = oauthType === "drive" ? "/resources?connected=drive" : "/events?connected=google";
+    const redirectPaths: Record<string, string> = {
+      drive: "/resources?connected=drive",
+      gmail: "/events?connected=gmail",
+      calendar: "/events?connected=google",
+    };
+    const redirectPath = redirectPaths[oauthType] || redirectPaths.calendar;
     return NextResponse.redirect(new URL(redirectPath, request.url));
   } catch (error: any) {
     return NextResponse.json(

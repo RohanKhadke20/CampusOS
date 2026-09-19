@@ -97,6 +97,20 @@ export interface MembershipRecord {
   role: "MEMBER" | "OFFICER" | "LEAD";
 }
 
+export interface GmailMessageRecord {
+  id: string;
+  userId: string;
+  messageId: string;
+  threadId?: string;
+  toEmail: string;
+  toName?: string;
+  subject: string;
+  templateType: string;
+  provider: "google_gmail" | "demo_local";
+  sentAt: string;
+  metadata?: Record<string, any>;
+}
+
 export interface EnrichedRegistration extends EventRegistration {
   user?: CampusUser;
   ticket?: any;
@@ -120,6 +134,7 @@ class DemoRepository {
   private googleConnections: GoogleConnectionRecord[] = [];
   private calendarEvents: CalendarEventRecord[] = [];
   private driveFiles: DriveFileRecord[] = [];
+  private gmailMessages: GmailMessageRecord[] = [];
 
   // User queries
   getUsers(): CampusUser[] {
@@ -1086,6 +1101,46 @@ class DemoRepository {
       return true;
     }
     return false;
+  }
+
+  // Gmail Messages
+  getGmailMessages(userId?: string, templateType?: string): GmailMessageRecord[] {
+    let list = this.gmailMessages;
+    if (userId) {
+      list = list.filter((m) => m.userId === userId);
+    }
+    if (templateType) {
+      list = list.filter((m) => m.templateType === templateType);
+    }
+    return list;
+  }
+
+  getGmailMessageById(id: string): GmailMessageRecord | undefined {
+    return this.gmailMessages.find((m) => m.id === id);
+  }
+
+  createGmailMessage(record: Omit<GmailMessageRecord, "id">): GmailMessageRecord {
+    const newRecord: GmailMessageRecord = {
+      ...record,
+      id: `gmail-${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    };
+    this.gmailMessages.unshift(newRecord);
+
+    this.logAudit({
+      actorId: record.userId,
+      action: "GMAIL_MESSAGE_SENT",
+      resourceType: "gmail_message",
+      resourceId: newRecord.id,
+      changes: {
+        toEmail: record.toEmail,
+        subject: record.subject,
+        templateType: record.templateType,
+        provider: record.provider,
+        messageId: record.messageId,
+      },
+    });
+
+    return newRecord;
   }
 
   logAudit(audit: Omit<AuditLog, "id" | "createdAt">): AuditLog {
