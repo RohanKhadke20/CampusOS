@@ -1,0 +1,196 @@
+{
+  "users": [
+    {
+      "id": "u-student-01",
+      "email": "alex.student@campus.edu",
+      "role": "STUDENT",
+      "profile": {
+        "fullName": "Alex Chen",
+        "studentId": "CS-2024-042",
+        "department": "Computer Science & Engineering",
+        "yearOfStudy": 3,
+        "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+      }
+    },
+    {
+      "id": "u-org-01",
+      "email": "sarah.lead@campus.edu",
+      "role": "ORGANIZER",
+      "profile": {
+        "fullName": "Sarah Jenkins",
+        "studentId": "EE-2023-118",
+        "department": "Robotics & Automation Society",
+        "yearOfStudy": 4,
+        "avatarUrl": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150"
+      }
+    },
+    {
+      "id": "u-admin-01",
+      "email": "dean.admin@campus.edu",
+      "role": "ADMIN",
+      "profile": {
+        "fullName": "Dr. Marcus Vance",
+        "studentId": "FAC-901",
+        "department": "Dean of Academic & Student Affairs",
+        "yearOfStudy": null,
+        "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+      }
+    }
+  ],
+  "organizations": [
+    {
+      "id": "org-acm-01",
+      "name": "ACM Student Chapter",
+      "slug": "acm-student-chapter",
+      "category": "Technology & Coding",
+      "description": "Premier computing society hosting hackathons, developer seminars, and competitive programming.",
+      "logoUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=100",
+      "isVerified": true
+    },
+    {
+      "id": "org-robotics-02",
+      "name": "Autonomous Robotics Lab",
+      "slug": "robotics-lab",
+      "category": "Hardware & AI",
+      "description": "Building micro-rovers, drones, and competing in global robotics challenges.",
+      "logoUrl": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=100",
+      "isVerified": true
+    },
+    {
+      "id": "org-design-03",
+      "name": "Design & Prototyping Collective",
+      "slug": "design-collective",
+      "category": "Creative Arts & UI/UX",
+      "description": "Fostering product design, 3D fabrication, and digital media craft.",
+      "logoUrl": "https://images.unsplash.com/photo-1542744094-3a31f272c490?w=100",
+      "isVerified": true
+    }
+  ],
+  "events": [
+    {
+      "id": "ev-hackathon-2026",
+      "organizationId": "org-acm-01",
+      "title": "CampusHack 2026: AI & Edge Systems",
+      "slug": "campushack-2026",
+      "description": "36-hour flagship campus hackathon focusing on Gemini agent workflows, autonomous campus tooling, and IoT hardware prototypes.",
+      "venue": "Turing Innovation Hall & Labs",
+      "startTime": "2026-10-15T09:00:00Z",
+      "endTime": "2026-10-16T21:00:00Z",
+      "status": "PUBLISHED",
+      "isPaid": true,
+      "maxCapacity": 250,
+      "bannerUrl": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+      "tickets": [
+        {
+          "id": "tkt-hack-student",
+          "title": "Student Developer Pass",
+          "priceCents": 49900,
+          "quantityAvailable": 150,
+          "quantitySold": 82
+        },
+        {
+          "id": "tkt-hack-team",
+          "title": "Team Squad Pass (4x)",
+          "priceCents": 159900,
+          "quantityAvailable": 25,
+          "quantitySold": 14
+        }
+      ]
+    },
+    {
+      "id": "ev-robotics-summit",
+      "organizationId": "org-robotics-02",
+      "title": "RoboCamp & Drone Showcase",
+      "slug": "robocamp-drone-showcase",
+      "description": "Live obstacle course trials, open telemetry demonstrations, and hands-on ROS2 workshop.",
+      "venue": "Main Quadrangle Arena",
+      "startTime": "2026-10-22T14:00:00Z",
+      "endTime": "2026-10-22T18:30:00Z",
+      "status": "PUBLISHED",
+      "isPaid": false,
+      "maxCapacity": 400,
+      "bannerUrl": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800",
+      "tickets": [
+        {
+          "id": "tkt-robo-free",
+          "title": "Free General Campus RSVP",
+          "priceCents": 0,
+          "quantityAvailable": 400,
+          "quantitySold": 245
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "tsk-01",
+      "userId": "u-student-01",
+      "title": "Submit Machine Learning Lab Report 4",
+      "description": "Complete convolutional network benchmark and upload PDF to Google Drive.",
+      "priority": "HIGH",
+      "status": "IN_PROGRESS",
+      "dueDate": "2026-09-24T23:59:59Z"
+    },
+    {
+      "id": "tsk-02",
+      "userId": "u-student-01",
+      "title": "Confirm Hackathon Mentorship Schedule",
+      "description": "Sync workshop timings with Professor Vance on Google Calendar.",
+      "priority": "MEDIUM",
+      "status": "TODO",
+      "dueDate": "2026-09-28T17:00:00Z"
+    }
+  ],
+  "attendance": [
+    {
+      "id": "att-01",
+      "userId": "u-student-01",
+      "subjectCode": "CS601",
+      "subjectName": "Distributed Systems",
+      "sessionDate": "2026-09-18",
+      "status": "PRESENT"
+    },
+    {
+      "id": "att-02",
+      "userId": "u-student-01",
+      "subjectCode": "CS602",
+      "subjectName": "Artificial Intelligence & Robotics",
+      "sessionDate": "2026-09-18",
+      "status": "PRESENT"
+    },
+    {
+      "id": "att-03",
+      "userId": "u-student-01",
+      "subjectCode": "CS603",
+      "subjectName": "Cloud Architecture & Security",
+      "sessionDate": "2026-09-17",
+      "status": "PRESENT"
+    }
+  ],
+  "resources": [
+    {
+      "id": "res-01",
+      "name": "NVIDIA GPU Cluster Lab (Room 304)",
+      "type": "LAB",
+      "capacity": 30,
+      "location": "Alan Turing Computer Science Block, 3rd Floor",
+      "isAvailable": true
+    },
+    {
+      "id": "res-02",
+      "name": "Grand Auditorium",
+      "type": "HALL",
+      "capacity": 800,
+      "location": "Central Campus Arts & Convention Complex",
+      "isAvailable": true
+    },
+    {
+      "id": "res-03",
+      "name": "Prototyping 3D Printing Station",
+      "type": "EQUIPMENT",
+      "capacity": 5,
+      "location": "Makerspace Hub, West Wing",
+      "isAvailable": true
+    }
+  ]
+}

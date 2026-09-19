@@ -1,0 +1,17 @@
+{
+  "name": "@campusos/mcp-server",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@campusos/core": "*",
+    "@campusos/db": "*",
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}
