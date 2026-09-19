@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processAICampusQuery } from "@campusos/ai";
+import { getCurrentUser } from "@/lib/auth/authorization";
 import { z } from "zod";
 
 const ChatRequestSchema = z.object({
@@ -17,6 +18,15 @@ const ChatRequestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // 1. Server-side session & authorization check
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized: Active CampusOS session required to query Campus AI" },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const parsed = ChatRequestSchema.safeParse(body);
 

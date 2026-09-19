@@ -22,7 +22,17 @@ interface StitchShellProps {
 }
 
 export function StitchShell({ children }: StitchShellProps) {
-  const { activeTab, setActiveTab, activePersona, setPersona, personas, theme, toggleTheme } = useApp();
+  const {
+    activeTab,
+    setActiveTab,
+    activePersona,
+    setPersona,
+    personas,
+    theme,
+    toggleTheme,
+    logout,
+    isLoadingAuth,
+  } = useApp();
   const [sosActive, setSosActive] = useState(false);
 
   const handleSos = () => {
@@ -67,6 +77,11 @@ export function StitchShell({ children }: StitchShellProps) {
 
   return (
     <div className="min-h-screen bg-[var(--canvas)] flex flex-col">
+      {/* Top Loading Bar when authenticating */}
+      {isLoadingAuth && (
+        <div className="fixed top-0 left-0 right-0 h-0.5 bg-[var(--brand-indigo)] animate-pulse z-50" />
+      )}
+
       {/* TOP HEADER */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-[var(--surface-glass)] backdrop-blur-md border-b border-[var(--border-subtle)] z-50 flex items-center justify-between px-5">
         <div className="flex items-center gap-6">
@@ -114,7 +129,7 @@ export function StitchShell({ children }: StitchShellProps) {
         </div>
 
         {/* Header Actions & Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={() => setActiveTab("ai")}
             className="hidden sm:flex items-center gap-1.5 bg-[var(--brand-indigo-subtle)] hover:opacity-90 border border-[var(--brand-indigo-subtle)] text-[var(--brand-indigo)] px-3 py-1.5 rounded-lg transition-all text-xs font-semibold focus-ring"
@@ -164,7 +179,8 @@ export function StitchShell({ children }: StitchShellProps) {
             ))}
           </div>
 
-          <div className="flex items-center gap-2.5 pl-2 border-l border-[var(--border-subtle)]">
+          {/* Profile & Logout */}
+          <div className="flex items-center gap-2 pl-2 border-l border-[var(--border-subtle)]">
             <div className="relative">
               <img
                 alt={activePersona.name}
@@ -181,6 +197,15 @@ export function StitchShell({ children }: StitchShellProps) {
                 {activePersona.department}
               </div>
             </div>
+
+            <button
+              onClick={logout}
+              title="Log Out of CampusOS"
+              aria-label="Sign out"
+              className="p-1.5 text-[var(--text-muted)] hover:text-[var(--status-critical)] hover:bg-[var(--surface-raised)] rounded-lg transition-colors focus-ring ml-1"
+            >
+              <span className="material-symbols-outlined text-lg">logout</span>
+            </button>
           </div>
         </div>
       </header>
@@ -234,12 +259,12 @@ export function StitchShell({ children }: StitchShellProps) {
         <div className="pt-3 mt-3 border-t border-[var(--border-subtle)] space-y-2">
           <div className="flex items-center gap-2 px-2.5 py-1.5 bg-[var(--status-success-surface)] border border-[var(--status-success-border)] rounded-lg text-[var(--status-success)] text-[11px] font-medium font-mono">
             <span className="w-2 h-2 rounded-full bg-[var(--status-success)] animate-pulse"></span>
-            <span>GCal Synced • Live</span>
+            <span>Auth Session • Persistent</span>
           </div>
 
           <div className="px-2 text-[10px] text-[var(--text-muted)] flex items-center justify-between">
-            <span>Demo Mode Active</span>
-            <span className="text-[var(--brand-indigo)] font-mono">Zero Creds</span>
+            <span>Role: {activePersona.role}</span>
+            <span className="text-[var(--brand-indigo)] font-mono">Verified</span>
           </div>
         </div>
       </aside>
