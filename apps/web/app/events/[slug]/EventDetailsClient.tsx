@@ -13,8 +13,25 @@ import {
   QrCode,
   Tag,
   Share2,
+  CreditCard,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { Button, Badge, Card, CardContent } from "@campusos/ui";
+
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window !== "undefined" && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
 
 export function EventDetailsClient({ slug }: { slug: string }) {
   const { activePersona } = useApp();
@@ -23,6 +40,8 @@ export function EventDetailsClient({ slug }: { slug: string }) {
   const [selectedTicketId, setSelectedTicketId] = useState<string>("");
   const [registering, setRegistering] = useState(false);
   const [registrationResult, setRegistrationResult] = useState<any>(null);
+  const [checkoutOrder, setCheckoutOrder] = useState<any>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const fetchEvent = useCallback(async () => {
     try {
@@ -50,25 +69,164 @@ export function EventDetailsClient({ slug }: { slug: string }) {
     fetchEvent();
   }, [fetchEvent]);
 
-  const handleRegister = async () => {
-    if (!event || !selectedTicketId) return;
+  // Server-side payment verification
+  // SECURITY: NEVER marks payment successful based only on frontend state
+  const verifyPayment = async (orderId: string, paymentId: string, signature: string) => {
     try {
       setRegistering(true);
-      const res = await fetch(`/api/events/${event.id}/register`, {
+      setPaymentError(null);
+      const verifyRes = await fetch("/api/payments/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ticketId: selectedTicketId }),
+        body: JSON.stringify({
+          orderId,
+          paymentId,
+          signature,
+        }),
+      });
+      const verifyJson = await verifyRes.json();
+      if (verifyRes.ok && verifyJson.success) {
+        setRegistrationResult(verifyJson.data.registration);
+        setCheckoutOrder(null);
+        fetchEvent();
+      } else {
+        const errMsg = verifyJson.error || "Payment cryptographic verification failed.";
+        setPaymentError(errMsg);
+      }
+    } catch (err: any) {
+      const errMsg = err.message || "Network error during verification";
+      setPaymentError(errMsg);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!event || !selectedTicketId) return;
+    setPaymentError(null);
+
+    const selectedTicket = event.tickets?.find((t: any) => t.id === selectedTicketId);
+
+    // Free ticket flow
+    if (!selectedTicket || selectedTicket.priceCents <= 0) {
+      try {
+        setRegistering(true);
+        const res = await fetch(`/api/events/${event.id}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticketId: selectedTicketId }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          setRegistrationResult(data.data);
+          fetchEvent();
+        } else {
+          setPaymentError(data.error || "Registration failed");
+        }
+      } catch (err: any) {
+        setPaymentError(err.message || "Network error");
+      } finally {
+        setRegistering(false);
+      }
+      return;
+    }
+
+    // Paid ticket flow: Step 1 -> Create Razorpay Order Server-side
+    try {
+      setRegistering(true);
+      const orderRes = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.id,
+          ticketId: selectedTicketId,
+          idempotencyKey: `idemp_${event.id}_${selectedTicketId}_${Date.now()}`,
+        }),
+      });
+
+      const orderJson = await orderRes.json();
+      if (!orderRes.ok || !orderJson.success) {
+        setPaymentError(orderJson.error || "Order creation failed.");
+        setRegistering(false);
+        return;
+      }
+
+      const orderData = orderJson.data;
+
+      // Step 2 -> Launch Razorpay Checkout
+      const scriptReady = await loadRazorpayScript();
+      if (scriptReady && typeof (window as any).Razorpay === "function") {
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "CampusOS University",
+          description: `${orderData.eventTitle} - ${orderData.ticketTitle}`,
+          order_id: orderData.orderId,
+          prefill: {
+            name: activePersona?.name || "Student Attendee",
+            email: activePersona?.email || "student@campusos.edu",
+          },
+          theme: {
+            color: "#4f46e5",
+          },
+          handler: async function (response: any) {
+            // Step 3 -> Verify on server
+            await verifyPayment(
+              response.razorpay_order_id,
+              response.razorpay_payment_id,
+              response.razorpay_signature
+            );
+          },
+          modal: {
+            ondismiss: function () {
+              setRegistering(false);
+            },
+          },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on("payment.failed", function (resp: any) {
+          setPaymentError(resp.error?.description || "Payment failed at gateway processor.");
+          setRegistering(false);
+        });
+        rzp.open();
+      } else {
+        // Fallback test sandbox window if checkout.js is blocked by sandbox/CSP/offline
+        setCheckoutOrder(orderData);
+        setRegistering(false);
+      }
+    } catch (err: any) {
+      setPaymentError(err.message || "Failed to initiate payment order");
+      setRegistering(false);
+    }
+  };
+
+  const handleSimulateTestPayment = async (simulateFailure = false) => {
+    if (!checkoutOrder) return;
+    try {
+      setRegistering(true);
+      const res = await fetch("/api/payments/test-simulate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: checkoutOrder.orderId,
+          simulateFailure,
+        }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setRegistrationResult(data.data);
-        fetchEvent();
+        await verifyPayment(
+          data.data.orderId,
+          data.data.paymentId,
+          data.data.signature
+        );
       } else {
-        alert(data.error || "Registration failed");
+        setPaymentError(data.error || "Simulation error");
+        setRegistering(false);
       }
     } catch (err: any) {
-      alert(err.message || "Network error");
-    } finally {
+      setPaymentError(err.message || "Simulation error");
       setRegistering(false);
     }
   };
@@ -96,6 +254,8 @@ export function EventDetailsClient({ slug }: { slug: string }) {
       </div>
     );
   }
+
+  const selectedTicket = event?.tickets?.find((t: any) => t.id === selectedTicketId);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
@@ -328,6 +488,28 @@ export function EventDetailsClient({ slug }: { slug: string }) {
                 })}
               </div>
 
+              {paymentError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <span className="font-semibold">Payment Notice</span>
+                    <p className="text-[11px] text-red-300/90 leading-tight">{paymentError}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedTicket && selectedTicket.priceCents > 0 && (
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-[11px] text-indigo-300 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <CreditCard className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Razorpay TEST MODE</span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase tracking-wider bg-indigo-500/20 px-1.5 py-0.5 rounded text-indigo-200">
+                    INR Sandbox
+                  </span>
+                </div>
+              )}
+
               <div className="pt-2">
                 <Button
                   size="md"
@@ -336,7 +518,11 @@ export function EventDetailsClient({ slug }: { slug: string }) {
                   onClick={handleRegister}
                   disabled={registering || !selectedTicketId}
                 >
-                  {registering ? "Confirming Pass..." : "Register Now"}
+                  {registering
+                    ? "Verifying with Gateway..."
+                    : selectedTicket && selectedTicket.priceCents > 0
+                    ? `Pay ₹${(selectedTicket.priceCents / 100).toFixed(0)} & Register`
+                    : "Register Now"}
                 </Button>
               </div>
 
@@ -344,6 +530,77 @@ export function EventDetailsClient({ slug }: { slug: string }) {
                 By registering you confirm attendance and compliance with university code of conduct.
               </p>
             </Card>
+          )}
+
+          {/* RAZORPAY TEST MODE CHECKOUT MODAL (Fallback / Sandbox) */}
+          {checkoutOrder && (
+            <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="w-full max-w-md bg-slate-900 border border-indigo-500/30 rounded-2xl p-6 space-y-5 shadow-2xl relative">
+                <button
+                  onClick={() => setCheckoutOrder(null)}
+                  className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-indigo-400" />
+                    <h3 className="text-base font-bold text-white">Razorpay Test Gateway</h3>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Complete simulated transaction for {checkoutOrder.eventTitle}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Order ID:</span>
+                    <span className="font-mono text-indigo-300">{checkoutOrder.orderId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Amount:</span>
+                    <span className="font-bold text-white font-mono">
+                      ₹{(checkoutOrder.amount / 100).toFixed(2)} {checkoutOrder.currency}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Key ID:</span>
+                    <span className="font-mono text-slate-300">{checkoutOrder.keyId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Mode:</span>
+                    <span className="text-amber-400 font-semibold">TEST MODE ONLY</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <Button
+                    size="md"
+                    variant="primary"
+                    className="w-full justify-center bg-indigo-600 hover:bg-indigo-500"
+                    disabled={registering}
+                    onClick={() => handleSimulateTestPayment(false)}
+                  >
+                    {registering ? "Verifying Signature..." : "Simulate Successful Test Payment"}
+                  </Button>
+
+                  <Button
+                    size="md"
+                    variant="outline"
+                    className="w-full justify-center border-red-500/40 text-red-400 hover:bg-red-500/10"
+                    disabled={registering}
+                    onClick={() => handleSimulateTestPayment(true)}
+                  >
+                    Simulate Payment Failure (Invalid Signature)
+                  </Button>
+                </div>
+
+                <p className="text-[10px] text-center text-slate-500">
+                  CRITICAL: All payments require server-side HMAC SHA256 cryptographic verification before any registration is confirmed.
+                </p>
+              </div>
+            </div>
           )}
         </div>
       </div>

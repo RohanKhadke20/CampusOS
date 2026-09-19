@@ -365,26 +365,33 @@ export const demoData = {
     {
       "id": "p1111111-1111-4111-8111-111111111111",
       "userId": "a1111111-1111-4111-8111-111111111111",
+      "eventId": "e1111111-1111-4111-8111-111111111111",
+      "registrationId": "g1111111-1111-4111-8111-111111111111",
       "orderId": "order_campus_98124",
       "paymentId": "pay_campus_34571",
+      "amount": 49900,
       "amountCents": 49900,
       "currency": "INR",
       "status": "CAPTURED",
       "eventTitle": "CampusHack 2026: AI & Edge Systems",
       "ticketTitle": "Student Developer Pass",
-      "createdAt": "2026-09-18T14:30:00Z"
+      "createdAt": "2026-09-18T14:30:00Z",
+      "updatedAt": "2026-09-18T14:30:00Z"
     },
     {
       "id": "p2222222-2222-4222-8222-222222222222",
       "userId": "a3333333-3333-4333-8333-333333333333",
+      "eventId": "e5555555-5555-4555-8555-555555555555",
       "orderId": "order_campus_77492",
       "paymentId": "pay_campus_66281",
+      "amount": 79900,
       "amountCents": 79900,
       "currency": "INR",
       "status": "CAPTURED",
       "eventTitle": "Algorithmic Trading & FinTech Symposium",
       "ticketTitle": "Delegate Pass & Trading Lab License",
-      "createdAt": "2026-09-18T16:45:00Z"
+      "createdAt": "2026-09-18T16:45:00Z",
+      "updatedAt": "2026-09-18T16:45:00Z"
     }
   ],
   "tasks": [

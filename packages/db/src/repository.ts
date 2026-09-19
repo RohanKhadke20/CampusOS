@@ -22,11 +22,21 @@ export interface PaymentRecord {
   orderId: string;
   paymentId?: string;
   amountCents: number;
+  amount: number;
   currency: string;
   status: "CREATED" | "AUTHORIZED" | "CAPTURED" | "FAILED" | "REFUNDED";
-  eventTitle: string;
-  ticketTitle: string;
+  eventTitle?: string;
+  ticketTitle?: string;
+  eventId?: string;
+  ticketId?: string;
+  registrationId?: string;
+  signature?: string;
+  idempotencyKey?: string;
+  errorCode?: string;
+  errorDescription?: string;
+  metadata?: Record<string, any>;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface NotificationRecord {
@@ -64,6 +74,7 @@ class DemoRepository {
   private payments: PaymentRecord[] = JSON.parse(JSON.stringify(demoData.payments));
   private notifications: NotificationRecord[] = JSON.parse(JSON.stringify(demoData.notifications));
   private auditLogs: AuditLog[] = JSON.parse(JSON.stringify(demoData.auditLogs));
+  private processedWebhooks: Set<string> = new Set<string>();
 
   // User queries
   getUsers(): CampusUser[] {
@@ -480,11 +491,262 @@ class DemoRepository {
     return this.payments;
   }
 
-  recordPayment(payment: Omit<PaymentRecord, "id" | "createdAt">): PaymentRecord {
+  getPaymentByOrderId(orderId: string): PaymentRecord | undefined {
+    return this.payments.find((p) => p.orderId === orderId);
+  }
+
+  getPaymentByPaymentId(paymentId: string): PaymentRecord | undefined {
+    return this.payments.find((p) => p.paymentId === paymentId);
+  }
+
+  createPaymentOrder(data: {
+    userId: string;
+    orderId: string;
+    amountCents: number;
+    currency?: string;
+    eventId?: string;
+    ticketId?: string;
+    eventTitle?: string;
+    ticketTitle?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, any>;
+  }): PaymentRecord {
+    // Idempotency: Return existing order if identical key or orderId exists
+    if (data.idempotencyKey) {
+      const existingKey = this.payments.find((p) => p.idempotencyKey === data.idempotencyKey);
+      if (existingKey) return existingKey;
+    }
+
+    const existingOrder = this.payments.find((p) => p.orderId === data.orderId);
+    if (existingOrder) return existingOrder;
+
+    const now = new Date().toISOString();
+    const newPayment: PaymentRecord = {
+      id: `p-${Date.now()}`,
+      userId: data.userId,
+      orderId: data.orderId,
+      amountCents: data.amountCents,
+      amount: data.amountCents,
+      currency: data.currency || "INR",
+      status: "CREATED",
+      eventId: data.eventId,
+      ticketId: data.ticketId,
+      eventTitle: data.eventTitle,
+      ticketTitle: data.ticketTitle,
+      idempotencyKey: data.idempotencyKey,
+      metadata: data.metadata || {},
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    this.payments.unshift(newPayment);
+
+    this.logAudit({
+      actorId: data.userId,
+      action: "PAYMENT_ORDER_CREATED",
+      resourceType: "payment",
+      resourceId: newPayment.id,
+      changes: {
+        orderId: data.orderId,
+        amountCents: data.amountCents,
+        eventId: data.eventId,
+        ticketId: data.ticketId,
+      },
+    });
+
+    return newPayment;
+  }
+
+  verifyAndCapturePayment(data: {
+    orderId: string;
+    paymentId: string;
+    signature?: string;
+  }): { payment: PaymentRecord; registration: any } {
+    const payment = this.payments.find(
+      (p) => p.orderId === data.orderId || p.paymentId === data.paymentId
+    );
+    if (!payment) {
+      throw new Error(`Payment order not found for ${data.orderId}`);
+    }
+
+    const now = new Date().toISOString();
+
+    // Idempotency: If already CAPTURED and registration exists, return existing
+    if (payment.status === "CAPTURED" && payment.registrationId) {
+      const existingReg = this.registrations.find((r) => r.id === payment.registrationId);
+      if (existingReg) {
+        return { payment, registration: existingReg };
+      }
+    }
+
+    payment.paymentId = data.paymentId;
+    if (data.signature) {
+      payment.signature = data.signature;
+    }
+    payment.status = "CAPTURED";
+    payment.updatedAt = now;
+
+    let reg = payment.registrationId
+      ? this.registrations.find((r) => r.id === payment.registrationId)
+      : undefined;
+
+    if (!reg && payment.eventId && payment.ticketId) {
+      const event = this.events.find((e) => e.id === payment.eventId);
+      const ticket = event?.tickets?.find((t: any) => t.id === payment.ticketId);
+
+      if (ticket) {
+        ticket.quantitySold = (ticket.quantitySold || 0) + 1;
+      }
+
+      const registrationNumber = `CAMPUS-${(event?.slug || "PASS").slice(0, 4).toUpperCase()}-${Math.floor(
+        100000 + Math.random() * 900000
+      )}`;
+
+      reg = {
+        id: `g-${Date.now()}`,
+        eventId: payment.eventId,
+        ticketId: payment.ticketId,
+        userId: payment.userId,
+        registrationNumber,
+        status: "CONFIRMED" as const,
+        checkInTime: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      this.registrations.unshift(reg);
+      payment.registrationId = reg.id;
+
+      // Confirmation notification
+      this.notifications.unshift({
+        id: `n-${Date.now()}`,
+        userId: payment.userId,
+        title: `Registration Confirmed: ${event?.title || payment.eventTitle || "Campus Event"}`,
+        message: `Your pass (${ticket?.title || payment.ticketTitle || "Ticket"}) has been verified. Registration #${registrationNumber}`,
+        linkUrl: event?.slug ? `/events/${event.slug}` : "/events",
+        isRead: false,
+        createdAt: now,
+      });
+
+      this.logAudit({
+        actorId: payment.userId,
+        action: "EVENT_REGISTRATION",
+        resourceType: "event_registration",
+        resourceId: reg.id,
+        changes: {
+          eventId: payment.eventId,
+          ticketId: payment.ticketId,
+          registrationNumber,
+          paymentId: data.paymentId,
+        },
+      });
+    }
+
+    this.logAudit({
+      actorId: payment.userId,
+      action: "PAYMENT_CAPTURED",
+      resourceType: "payment",
+      resourceId: payment.id,
+      changes: {
+        orderId: payment.orderId,
+        paymentId: payment.paymentId,
+        amountCents: payment.amountCents,
+        status: "CAPTURED",
+      },
+    });
+
+    return { payment, registration: reg };
+  }
+
+  markPaymentFailed(data: {
+    orderId?: string;
+    paymentId?: string;
+    errorCode?: string;
+    errorDescription?: string;
+  }): PaymentRecord | undefined {
+    const payment = this.payments.find(
+      (p) =>
+        (data.orderId && p.orderId === data.orderId) ||
+        (data.paymentId && p.paymentId === data.paymentId)
+    );
+    if (!payment) return undefined;
+
+    payment.status = "FAILED";
+    payment.errorCode = data.errorCode || "PAYMENT_FAILED";
+    payment.errorDescription =
+      data.errorDescription || "Payment was declined or failed verification.";
+    payment.updatedAt = new Date().toISOString();
+
+    this.logAudit({
+      actorId: payment.userId,
+      action: "PAYMENT_FAILED",
+      resourceType: "payment",
+      resourceId: payment.id,
+      changes: {
+        orderId: payment.orderId,
+        paymentId: payment.paymentId,
+        errorCode: payment.errorCode,
+        errorDescription: payment.errorDescription,
+      },
+    });
+
+    return payment;
+  }
+
+  processPaymentRefund(paymentId: string, refundId?: string): PaymentRecord | undefined {
+    const payment = this.payments.find(
+      (p) => p.paymentId === paymentId || p.orderId === paymentId
+    );
+    if (!payment) return undefined;
+
+    payment.status = "REFUNDED";
+    payment.updatedAt = new Date().toISOString();
+    payment.metadata = {
+      ...(payment.metadata || {}),
+      refundId: refundId || `rfnd_${Date.now()}`,
+    };
+
+    if (payment.registrationId) {
+      const reg = this.registrations.find((r) => r.id === payment.registrationId);
+      if (reg) {
+        reg.status = "CANCELLED";
+        reg.updatedAt = new Date().toISOString();
+      }
+    }
+
+    this.logAudit({
+      actorId: payment.userId,
+      action: "PAYMENT_REFUNDED",
+      resourceType: "payment",
+      resourceId: payment.id,
+      changes: {
+        paymentId: payment.paymentId,
+        refundId,
+        status: "REFUNDED",
+      },
+    });
+
+    return payment;
+  }
+
+  // Webhook event tracking for idempotency
+  isWebhookEventProcessed(eventId: string): boolean {
+    return this.processedWebhooks.has(eventId);
+  }
+
+  recordWebhookEvent(eventId: string): void {
+    this.processedWebhooks.add(eventId);
+  }
+
+  recordPayment(payment: any): PaymentRecord {
+    const now = new Date().toISOString();
     const newPayment: PaymentRecord = {
       ...payment,
       id: `p-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      amount: payment.amountCents || payment.amount || 0,
+      amountCents: payment.amountCents || payment.amount || 0,
+      createdAt: now,
+      updatedAt: now,
     };
     this.payments.unshift(newPayment);
 

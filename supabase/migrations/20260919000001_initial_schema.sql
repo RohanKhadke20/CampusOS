@@ -231,10 +231,14 @@ CREATE TRIGGER trg_event_registrations_updated_at
 CREATE TABLE IF NOT EXISTS payments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+    event_id UUID REFERENCES events(id) ON DELETE SET NULL,
     registration_id UUID REFERENCES event_registrations(id) ON DELETE SET NULL,
+    order_id VARCHAR(100) UNIQUE,
+    payment_id VARCHAR(100) UNIQUE,
     razorpay_order_id VARCHAR(100) UNIQUE NOT NULL,
     razorpay_payment_id VARCHAR(100) UNIQUE,
     razorpay_signature VARCHAR(255),
+    amount INT,
     amount_cents INT NOT NULL CHECK (amount_cents >= 0),
     currency VARCHAR(10) NOT NULL DEFAULT 'INR',
     status payment_status NOT NULL DEFAULT 'CREATED',
@@ -246,7 +250,9 @@ CREATE TABLE IF NOT EXISTS payments (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
-CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments(razorpay_order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_event_id ON payments(event_id);
+CREATE INDEX IF NOT EXISTS idx_payments_order_id ON payments(order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_razorpay_order_id ON payments(razorpay_order_id);
 CREATE INDEX IF NOT EXISTS idx_payments_reg_id ON payments(registration_id);
 CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status);
 
